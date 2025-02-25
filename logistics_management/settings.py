@@ -40,6 +40,7 @@ INSTALLED_APPS = [
 
     # My App
     'logistics_app',
+    
 ]
 
 MIDDLEWARE = [
