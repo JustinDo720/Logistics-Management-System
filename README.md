@@ -14,10 +14,10 @@ The LMS will facilitate order processing, shipment tracking, inventory managemen
 
 Our [UML](UML%20&%20Sketches/lms_uml.PNG) class diagrams will help us create our *Django Models* and we've also included an **initial** [screen ketch](UML%20&%20Sketches/lms_sketch.png) that maps out our *Django Templates* 
 
-## User Authentication 
+## User Authentication.
 
-## Order Management
+## Order Management.
 
-## Inventory Management 
+## Inventory Management.
 
-## Route Optimzation 
+## Route Optimzation. 
