@@ -11,19 +11,23 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
+import dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Loading our .env file 
+dotenv.load_dotenv('.env')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-*3+(#h$tqo3an@iasv!hnbdqk2bz7%m3agl)m%lhrzs++i+jyz'
+SECRET_KEY = os.getenv('SECRET_LOCAL_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG_LOCAL')
 
 ALLOWED_HOSTS = []
 
@@ -40,6 +44,10 @@ INSTALLED_APPS = [
 
     # My App
     'logistics_app',
+    'workers',
+    'bootstrap5',
+    'crispy_forms',
+    'crispy_bootstrap5',
     
 ]
 
@@ -58,7 +66,7 @@ ROOT_URLCONF = 'logistics_management.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -77,10 +85,21 @@ WSGI_APPLICATION = 'logistics_management.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+MYSQL_CONNECTION_STR = os.getenv('MYSQL_LOCAL_CONNECTION').split(' ')
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': MYSQL_CONNECTION_STR[0],
+        'USER': MYSQL_CONNECTION_STR[1],
+        'PASSWORD': MYSQL_CONNECTION_STR[2],
+        'HOST': MYSQL_CONNECTION_STR[3],
+        'PORT': MYSQL_CONNECTION_STR[4],
     }
 }
 
@@ -120,8 +139,29 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles') #   Collectionstatic Command 
+# Staticfile Dir to use in local env (Expecting a "static/" folder in Root Dir)
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static')
+]
+
+
+# Media files (Handle User Profile Pictures)
+# (Expecting a "uploads/" folder in Root Dir)
+MEDIA_URL = "uploads/"     # Now we could see the image via: localhost:8000/media/...
+MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Making sure we point our default user model to Worker 
+AUTH_USER_MODEL = 'workers.LMSWorker'
+
+# Authentication Redirects
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/" 
+
+# Crispy Form Filters
+CRISPY_TEMPLATE_PACK = "bootstrap5"
