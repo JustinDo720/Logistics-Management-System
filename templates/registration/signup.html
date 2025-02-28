@@ -1,0 +1,38 @@
+{% extends 'base/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+    LMS - Register
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        {# 2 empty columns to center our form but also appear full width on mobile #}
+        <div class="col-12 col-md-2"></div>
+        <div class="col-12 col-md-8">
+                <div class="container mt-5">
+                    <div class="card mb-3 border-secondary shadow p-3">
+                        <div class="row g-0">
+                          <div class="col-md-4">
+                            {% load static %}
+                            <img src="{% static 'Logistics_Management_System.png' %}" class="img-fluid rounded-start" alt="...">
+                          </div>
+                          <div class="col-md-8">
+                            <div class="card-body bg-light">
+                                <h3 class="card-title fw-semibold">Register</h3>
+                                <form method="POST" action="{% url 'workers:register' %}">
+                                    {% csrf_token %}
+                                    {{ register_form | crispy }}
+                                    <div class="text-center">
+                                        <button class="btn btn-outline-success">Sign Up</button>
+                                    </div>
+                                </form>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                </div>
+        </div>
+        <div class="col-12 col-md-2"></div>
+    </div>
+{% endblock %}

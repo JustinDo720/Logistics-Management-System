@@ -1,0 +1,15 @@
+{#  Make sure we extend from base/base.html everytime (templates/base/base.html) #}
+{% extends 'base/base.html' %}
+
+{# Block title  to Update our title #}
+
+{% block title %}
+    Home 
+{% endblock %}
+
+{# Content is to modify everything that's within our Body #}
+{% block content %}
+    <h1>Building the HomePage</h1> 
+    <hr/>
+    <p>Extended from Base.html</p> 
+{% endblock %}
