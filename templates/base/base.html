@@ -24,22 +24,47 @@
             <span class="navbar-toggler-icon"></span>
           </button>
           <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-                <ul class="navbar-nav m-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="{% url 'login' %}">Login</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Register</a>
-                    </li>              
+                <ul class="navbar-nav m-auto mb-3 mb-lg-0">
+                    {% if not user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'workers:register'%}">Register</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="{% url 'login' %}">Login</a>
+                        </li>
+                    {% endif %}              
                 </ul>
+                {% if user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-circle"></i>
+                          </button>
+                        <ul class="dropdown-menu">
+                        <li><h6 class="dropdown-header">Current Role: {{ user.get_role_display }}</h6></li>
+                        <li><hr class="dropdown-divider"></li>
+                        
+                        <li><a class="dropdown-item" href="#">Profile</a></li>
+                        <li class="text-center p-1">
+                            <a href="{% url 'logout' %}" class="d-grid gap-2" style="text-decoration: none;">
+                                <button class="btn btn-sm btn-outline-danger">
+                                    Log Out
+                                </button>
+                            </a>
+                        </li>
+                        </ul>
+                    </li>
+                    <span style="color:whitesmoke" class="fw-bold shadow">
+                        &nbsp;Welcome {{ user.username | title }}!
+                    </span>
+                {% endif %}   
           </div>
         </div>
       </nav>
     {# Sidebar #}
     <div class="container-fluid">
         <div class="row">
-            <div class="col-sm-auto bg-light sticky-top">
-                <div class="d-flex flex-sm-column flex-row flex-nowrap bg-light align-items-center sticky-top">
+            <div class="col-sm-auto sticky-top" style="background: #e3f2fd;">
+                <div class="d-flex flex-sm-column flex-row flex-nowrap align-items-center sticky-top">
                     <ul class="nav nav-pills nav-flush flex-sm-column flex-row flex-nowrap mb-auto mx-auto text-center align-items-center">
                         <a href="{% url 'logistics_app:home' %}" class="d-block p-3 link-dark text-decoration-none" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Icon-only">
                             <i class="bi bi-house fs-5"></i> Home
