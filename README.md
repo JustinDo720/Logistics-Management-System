@@ -19,6 +19,20 @@ Our [UML](UML%20&%20Sketches/lms_uml.PNG) class diagrams will help us create our
 Our [Flowchart](flowchart_&_usecase/TekBasic_-_Flowchart.jpg) and [User Story](flowchart_&_usecase/tek_basic_LMS_spreadsheet.png) helps us map out the workflow of our logistic management system 
 
 ## Update Logs 
+- 03/04
+  - Profile Page 
+    - Update Form with **help texts** and **fields** (Including *New Password*)
+      - Handle Form Errors as well 
+    - Display of current contact info 
+    - Need to work on File Submission  
+  - Success/Error Message 
+    - Figure out how to use `toast` + handle `form errors` 
+    - Django `messages`
+      - Custom tags in `settings.py`. Our `base.html` (which we extend on every temp) houses our toast and has a js script to show it 
+      - [Guide](https://stackoverflow.com/questions/67044129/django-messages-bootstrap-toast-how-to-make-it-work)
+      - [JS Toast Event](https://joshkaramuth.com/blog/django-messages-toast-htmx/)
+  - 
+  - Product + Inventory Management 
 - 02/27
   - Authentication System 
   - Media & Static [Files](https://dev.to/emiloju/how-to-handle-media-uploads-in-django-1kpc) 

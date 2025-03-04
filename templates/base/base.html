@@ -19,7 +19,10 @@
     {# We need navbar-light or navbar-dark to see our collapse button #}
     <nav class="navbar navbar-expand-lg border-bottom border-body navbar-dark bg-dark">
         <div class="container-fluid">
-          <a class="navbar-brand" href="#">LMS Icon Here</a>
+          <a class="navbar-brand btn btn-sm btn-light" href="{% url 'logistics_app:home' %}">
+            {% load static %}
+            <img src="{% static 'Logistics_Management_System.png' %}" alt="LMS" width="35" height="5%">
+          </a>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
           </button>
@@ -30,32 +33,28 @@
                             <a class="nav-link" href="{% url 'workers:register'%}">Register</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" href="{% url 'login' %}">Login</a>
+                            <a class="nav-link active" aria-current="page" href="{% url 'workers:custom_login' %}">Login</a>
                         </li>
                     {% endif %}              
                 </ul>
                 {% if user.is_authenticated %}
-                    <li class="nav-item dropdown">
+                    <li class="nav-item dropdown me-5">
                         <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-person-circle"></i>
                           </button>
                         <ul class="dropdown-menu">
-                        <li><h6 class="dropdown-header">Current Role: {{ user.get_role_display }}</h6></li>
+                        <li><h6 class="dropdown-header fw-bold">{{ user.username | title }}</h6></li>     
+                        <li><h6 class="dropdown-header">{{ user.get_role_display }}</h6></li>
                         <li><hr class="dropdown-divider"></li>
                         
-                        <li><a class="dropdown-item" href="#">Profile</a></li>
+                        <li><a class="dropdown-item" href="{% url 'workers:profile' user_id=user.id%}">Profile</a></li>
                         <li class="text-center p-1">
-                            <a href="{% url 'logout' %}" class="d-grid gap-2" style="text-decoration: none;">
-                                <button class="btn btn-sm btn-outline-danger">
-                                    Log Out
-                                </button>
-                            </a>
                         </li>
                         </ul>
                     </li>
-                    <span style="color:whitesmoke" class="fw-bold shadow">
-                        &nbsp;Welcome {{ user.username | title }}!
-                    </span>
+                    <a href="{% url 'logout' %}" class="d-grid gap-2 btn btn-sm btn-danger" style="text-decoration: none;">
+                        Log Out
+                    </a>
                 {% endif %}   
           </div>
         </div>
@@ -164,10 +163,45 @@
             </div>
             <div class="col-sm p-3 min-vh-100">
                 {% block content %}{% endblock %}
+                {% if messages %}
+                    {% for msg in messages %}
+                    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+                        <div id="liveToast" {% if msg.tags %} class="{{ msg.tags }} toast" {% else %} class='toast'{% endif %} role="alert" aria-live="assertive" aria-atomic="true">
+                        <div class="toast-header">
+                            <strong class="me-auto">Notification</strong>
+                            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                        <div class="toast-body">
+                            {{ msg | safe }}
+                        </div>
+                        </div>
+                    </div>     
+                    {% endfor %}
+            {% endif %}
             </div>
         </div>
     </div>
     </div>
 </div>
+<script>
+    // Initialize Toast 
+    // https://joshkaramuth.com/blog/django-messages-toast-htmx/
+    function initToasts() {
+        const toastEls = document.querySelectorAll(".toast");
+        if(toastEls){
+            toastEls.forEach((el) => {
+                const toast = window.bootstrap.Toast.getOrCreateInstance(el);
+                toast.show();
+                el.addEventListener("hidden.bs.toast", () => {
+                  el.remove();
+                });
+              });
+        }
+      }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        initToasts();
+      });
+</script>
 </body>
 </html>

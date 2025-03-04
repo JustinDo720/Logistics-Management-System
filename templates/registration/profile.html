@@ -1,0 +1,93 @@
+{% extends 'base/base.html' %}
+
+{% block title %}LMS - Profile{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            {# Profile Showcase #}
+            <div class="col-12 col-md-4">
+                <div class="container">
+                    <div class="card  border-light shadow-sm p-1 rounded" style="background: #e3f2fd;">
+                        {% if my_user.profile_icon %}
+                            <img src="..." class="card-img-top" alt="...">
+                        {% endif %}
+                        <div class="card-body ">
+                          <h3 class="card-title fw-bold">{{ my_user.username }}</h3>
+                          <h6 class="card-subtitle mb-2 text-secondary">Hired On: {{ my_user.hired_date }}</h6>
+                          <ul class="list-group mt-3">
+                            <li class="list-group-item list-group-item-primary">Contact: {{ my_user.email }}</li>
+                            <li class="list-group-item list-group-item-primary">Working As: {{ my_user.get_role_display }}</li>
+                          </ul>
+                        </div>
+                      </div>
+                </div>
+            </div>
+            {# Profile Update #}
+            <div class="col-12 col-md-8">
+                <div class="container">
+                    <div class="card text-light bg-dark border-light shadow-sm p-1 rounded">
+                        <div class="card-body">
+                          <h5 class="card-title fs-3 fw-bold mb-3">Update Profile Information</h5>
+                           <form method="POST" action="{% url 'workers:profile' user_id=user.id %}">
+                            {% csrf_token %}
+                                <div class="row row-cols-1 row-cols-md-2 mb-4 g-4">
+                                    <div class="col">
+                                        <label for="username" class="form-label">
+                                            {{ form.username.label }}
+                                        </label>
+                                        {{ form.username }}
+                                        <div class="form-text text-warning">{{ form.username.help_text }}</div>
+                                    </div>
+                                    <div class="col">
+                                        <label for="email" class="form-label">
+                                            {{ form.email.label }}
+                                        </label>
+                                        {{ form.email }}
+                                    </div>
+                                    <div class="col">
+                                        <label for="new_password" class="form-label">
+                                            {{ form.new_password.label }}
+                                        </label>
+                                        {{ form.new_password }}
+                                        <div class="form-text text-info">{{ form.new_password.help_text }}</div>
+                                    </div>
+                                    <div class="col">
+                                        <label for="role" class="form-label">
+                                            {{ form.role.label }}
+                                        </label>
+                                        {{ form.role }}
+                                        <div class="form-text text-info">{{ form.role.help_text }}</div>
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <label for="profile_icon" class="form-label">
+                                        {{ form.profile_icon.label }}
+                                    </label>
+                                    {{ form.profile_icon }}
+                                </div>
+                                {# Handling Form Errs #}
+                                <div class="row row-cols-1 row-cols-md-2 mb-4 g-3">
+                                    {% if form.errors %}
+                                        {% for field in form %}
+                                            {% for err in field.errors %}
+                                                <div class="col">
+                                                    <p class="text-danger">
+                                                        {{ field.label }}: {{ err | escape }}
+                                                    </p>
+                                                </div>
+                                            {% endfor %}
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+                                <div class="text-center">
+                                    <button class="btn btn-outline-warning">Update My Information</button>
+                                </div>
+                           </form>
+                        </div>
+                      </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
