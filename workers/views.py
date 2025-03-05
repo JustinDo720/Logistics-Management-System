@@ -5,7 +5,7 @@ from .models import LMSWorker
 from .forms import WorkerUserCreationForm, LMSWorkerUpdate
 from django.http import HttpResponse
 from django.contrib.messages import constants as messages
-from django.contrib.auth import authenticate, login 
+from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
@@ -71,7 +71,7 @@ def profile(request, user_id):
         update_form = LMSWorkerUpdate(instance=my_user)
         return render(request, gen_temp('profile.html'), context={'form': update_form, 'my_user': my_user})
     elif request.method == 'POST':
-        update_form = LMSWorkerUpdate(instance=my_user, data=request.POST)
+        update_form = LMSWorkerUpdate(instance=my_user, data=request.POST, files=request.FILES)
         if update_form.is_valid():
             # Checking for new password field before saving 
             if request.POST['new_password']:
@@ -90,3 +90,22 @@ def profile(request, user_id):
             curr_user = get_object_or_404(LMSWorker, id=user_id)
             messages.error(request, 'Failed To Update Your Profile!')
             return render(request, gen_temp('profile.html'), context={'form': update_form, 'my_user': curr_user})
+
+@login_required
+def del_profile(request, user_id):
+    if request.method == 'POST':
+        u = get_object_or_404(LMSWorker, id=user_id)
+        # Deleted by a superuser or the user itself 
+        if request.user == u or request.user.is_superuser:
+            u.delete()
+            messages.warning(request, 'Your Profile has been removed. Thank you for your help.')
+    
+    # Regardless of the action we'll return home 
+    return redirect('logistics_app:home')
+
+@login_required
+def custom_logout(request):
+    logout(request)
+    # Displaying a logout message 
+    messages.info(request, "You've been logged out from our system.")
+    return redirect('logistics_app:home')

@@ -24,14 +24,16 @@ Our [Flowchart](flowchart_&_usecase/TekBasic_-_Flowchart.jpg) and [User Story](f
     - Update Form with **help texts** and **fields** (Including *New Password*)
       - Handle Form Errors as well 
     - Display of current contact info 
-    - Need to work on File Submission  
+    - Need to work on File Submission & Delete account 
+      - `request.FILES` for our Form Class and `enctype="multipart/form-data"` for our Form Tag  
+      - Bootstrap Modal to confirm Delete
   - Success/Error Message 
     - Figure out how to use `toast` + handle `form errors` 
     - Django `messages`
       - Custom tags in `settings.py`. Our `base.html` (which we extend on every temp) houses our toast and has a js script to show it 
       - [Guide](https://stackoverflow.com/questions/67044129/django-messages-bootstrap-toast-how-to-make-it-work)
       - [JS Toast Event](https://joshkaramuth.com/blog/django-messages-toast-htmx/)
-  - 
+  - Favicon
   - Product + Inventory Management 
 - 02/27
   - Authentication System 
@@ -57,8 +59,8 @@ Our [Flowchart](flowchart_&_usecase/TekBasic_-_Flowchart.jpg) and [User Story](f
   - Role Field (default to "Worker") Updated by **ADMINS**
   - Depending on each role, they'll be granted certain access     
 - [x] Register & Login Page (Error/Success Message)
-- [ ] Sign Out (Error/Success Message)
-- [ ] Updating Profile Information 
+- [x] Sign Out (Error/Success Message)
+- [x] Updating Profile Information 
 
 
 ## Order Management 
