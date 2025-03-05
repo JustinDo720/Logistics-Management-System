@@ -19,7 +19,23 @@ Our [UML](UML%20&%20Sketches/lms_uml.PNG) class diagrams will help us create our
 Our [Flowchart](flowchart_&_usecase/TekBasic_-_Flowchart.jpg) and [User Story](flowchart_&_usecase/tek_basic_LMS_spreadsheet.png) helps us map out the workflow of our logistic management system 
 
 ## Update Logs 
-- 03/04
+**03/05**
+- Handling Product/Inventory Signal 
+- Update Total Price Signal 
+- Django Commands to insert Fake Data?
+  - `faker` `pip install Faker` + `pip install colorama`
+  - Based on Products/Inventory we could use `py manage.py create_ws_data -n 10 -m Inventory` *to create 10 Testing Inventory Data* 
+- Warehouse Staff User Story:
+  -  Inventory Management Page 
+  -  Searching Inventory based off SKU 
+  -  View Specific Inventory based off SKU 
+  -  Create new inventory 
+     - This would suggest that Product:Inventory = One:Many relationship 
+     - But we'll build an inventory by default   
+  -  Update & Remove Inventory 
+
+
+**03/04** 
   - Profile Page 
     - Update Form with **help texts** and **fields** (Including *New Password*)
       - Handle Form Errors as well 
@@ -35,7 +51,11 @@ Our [Flowchart](flowchart_&_usecase/TekBasic_-_Flowchart.jpg) and [User Story](f
       - [JS Toast Event](https://joshkaramuth.com/blog/django-messages-toast-htmx/)
   - Favicon
   - Product + Inventory Management 
-- 02/27
+    - Signals => total price 
+    - Signals => Create Inventory once Product is created  
+    - `pip install django-extensions` to access shell_plus
+
+**02/27**
   - Authentication System 
   - Media & Static [Files](https://dev.to/emiloju/how-to-handle-media-uploads-in-django-1kpc) 
   - [Bootstrap5](https://www.w3schools.com/django/django_add_bootstrap5.php) Integration 
