@@ -1,0 +1,56 @@
+{#  Make sure we extend from base/base.html everytime (templates/base/base.html) #}
+{% extends 'base/base.html' %}
+
+{# Block title  to Update our title #}
+
+{% block title %}
+    Order List 
+{% endblock %}
+
+{# Content is to modify everything that's within our Body #}
+{% block content %}
+
+
+<div class="d-flex justify-content-between">
+    <a class="btn btn-info">Create Order</a>
+    
+    <form action="{% url 'logistics_app:order_list' %}" method="GET">
+        <input type="search" name="query" placeholder="Search..." value="{{ request.GET.query }}">
+        <button class="btn btn-info" type="submit">Search</button>
+    </form>
+</div>
+
+<h1>Order List</h1>
+<table class="table">
+    <thead>
+
+        <tr>
+            <th>Order ID</th>
+            <th>Customer Name</th>
+            <th>Status</th>
+            <th>Total</th>
+            <th>Actions</th>
+        </tr>
+
+    </thead>
+
+
+    <tbody>
+        {% for order in orders %}
+            <tr>
+                <td>{{order.id}}</td>
+                <td>{{order.customer_name}}</td>
+                <td>{{order.status}}</td>
+                <td>{{order.total_price}}</td>
+                <td>
+                    <a href="{% url 'logistics_app:order_detail' pk=order.id %}" class="btn btn-info">View</a>
+                    <a class="btn btn-primary">Update</a>
+                    <a class="btn btn-danger">Delete</a>
+
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}
