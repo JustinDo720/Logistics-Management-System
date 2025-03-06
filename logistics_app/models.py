@@ -8,21 +8,21 @@ from decimal import Decimal
 
 class Order(models.Model):
     status_choices = [
-        ('receive', 'Received'),
-        ('in-transit', 'In Transit'),
-        ('delivered', 'Delivered')
+        ('Receive', 'Received'),
+        ('In-Transit', 'In Transit'),
+        ('Delivered', 'Delivered')
     ]
 
     priority_level_choices = [
-        ('medium', 'Medium'),
-        ('high', 'High')
+        ('Medium', 'Medium'),
+        ('High', 'High')
     ]
 
     customer_name = models.CharField(max_length=150)
     order_slug = models.SlugField(null=True, blank=True)
     date = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=50, choices=status_choices, default='receive')
-    priority_level = models.CharField(max_length=30, choices=priority_level_choices, default='medium')
+    status = models.CharField(max_length=50, choices=status_choices, default='Receive')
+    priority_level = models.CharField(max_length=30, choices=priority_level_choices, default='Medium')
     destination_address = models.CharField(max_length=300)
     # https://stackoverflow.com/questions/12384460/allow-only-positive-decimal-numbers
     total_price = models.DecimalField(max_digits=14, decimal_places=2, blank=True, null=True, validators=[MinValueValidator(Decimal('0.01'))])

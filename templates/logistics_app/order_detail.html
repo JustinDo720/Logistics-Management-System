@@ -1,0 +1,26 @@
+{#  Make sure we extend from base/base.html everytime (templates/base/base.html) #}
+{% extends 'base/base.html' %}
+
+{# Block title  to Update our title #}
+
+{% block title %}
+    Order Detail 
+{% endblock %}
+
+{# Content is to modify everything that's within our Body #}
+{% block content %}
+
+<h1>Order Details</h1>
+    <ul>
+        <li>Customer Name: {{order.customer_name}}</li>
+        <li>Order Date: {{order.date}}</li>
+        <li>Status: {{order.status}}</li>
+        <li>Priority Level: {{order.priority_level}}</li>
+        <li>Destination Address: {{order.destination_address}}</li>
+        <li>Price: {{order.total_price}}</li>
+       
+    </ul>
+    <a class="btn btn-secondary" href="{% url 'logistics_app:order_list' %}">Back to List</a>
+
+
+{% endblock %}

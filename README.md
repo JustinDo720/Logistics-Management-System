@@ -39,6 +39,13 @@ Our [Flowchart](flowchart_&_usecase/TekBasic_-_Flowchart.jpg) and [User Story](f
      - Forms appear as Modal switching via Button on that modal 
        - Error handling, Toast message, Bootstrap form  
   -  ~~Update & Remove Inventory~~
+-  Prepare to merge (github):
+   -  Add and Commit any changes 
+   -  `git fetch origin master` to fetch the latest changes 
+   -  `git merge origin/master`
+   -  Resolve conflict + add commit new changes 
+   -  Push changes + pull request 
+   -  `python manage.py makemigrations --merge`
 
 
 **03/04** 

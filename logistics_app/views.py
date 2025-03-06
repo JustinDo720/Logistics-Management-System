@@ -1,9 +1,8 @@
 from django.urls import reverse_lazy
-from django.shortcuts import render, redirect 
+from django.shortcuts import render, redirect, get_object_or_404
 from workers.models import LMSWorker
-from .models import Product, Inventory
+from .models import Product, Inventory, Order
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404
 from django.db.models import Q  # Searching 
 from .forms import InventoryF, ProductF
 from django.contrib import messages
@@ -14,7 +13,6 @@ def gen_temp(temp_name):
 # Create your views here.
 def home_page(request):
     return render(request, gen_temp('home.html'))
-
 
 # Product & Inventory Management 
 # CRUD - Inventory 
@@ -91,3 +89,15 @@ def view_inventory(request):
             context['inv_form'] = inv_form 
             return render(request, gen_temp('inventory_view.html'), context=context)
 
+def order_list_view(request):
+    query = request.GET.get('query', '')
+    if query:
+        orders = Order.objects.filter(customer_name__icontains=query)   # case insensitive search
+    else:
+        orders = Order.objects.all()    # show all orders if no search term
+
+    return render(request, 'logistics_app/order_list.html', {'orders': orders})
+
+def order_detail_view(request, pk):
+    order = get_object_or_404(Order, pk=pk)
+    return render(request, 'logistics_app/order_detail.html', {'order': order})
