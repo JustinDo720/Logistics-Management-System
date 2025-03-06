@@ -9,7 +9,7 @@ from django.dispatch import receiver
 def create_inventory(sender, instance, created, **kwargs):
     # If our instance was created then we'll create an Inventory for that product 
     if created:
-        inv = Inventory.objects.create(product=instance)
+        inv = Inventory.objects.create(product=instance, location='DEFAULT')
         # Once our Inventory is created we actually need to save this Inventory 
         inv.save()  # Save here is fine because Inventory isnt out sender 
 

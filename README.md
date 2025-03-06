@@ -27,12 +27,18 @@ Our [Flowchart](flowchart_&_usecase/TekBasic_-_Flowchart.jpg) and [User Story](f
   - Based on Products/Inventory we could use `py manage.py create_ws_data -n 10 -m Inventory` *to create 10 Testing Inventory Data* 
 - Warehouse Staff User Story:
   -  Inventory Management Page 
-  -  Searching Inventory based off SKU 
-  -  View Specific Inventory based off SKU 
-  -  Create new inventory 
+  -  [Searching](https://learndjango.com/tutorials/django-search-tutorial) Inventory based off SKU 
+     - **Parent Search HTML** where we create a *block* use *variables* then in our **Child template** we use the *block* and supply the *variables*
+     - `{% with var=val var2=val2 %}`  
+     - Form sends a `GET` request without a *csrf token* which redirects us BACK to our current page **WITH URL PARAMS**
+     - use `Q` with `filter` to search our model based on `request.GET.get('url_param')`   
+  - ~~View Specific Inventory based off SKU~~
+  -  Create new inventory and product
      - This would suggest that Product:Inventory = One:Many relationship 
      - But we'll build an inventory by default   
-  -  Update & Remove Inventory 
+     - Forms appear as Modal switching via Button on that modal 
+       - Error handling, Toast message, Bootstrap form  
+  -  ~~Update & Remove Inventory~~
 
 
 **03/04** 

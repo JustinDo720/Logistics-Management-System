@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils.text import slugify
 from random import randint 
+from django.core.validators import MinValueValidator
+from decimal import Decimal
 
 # Create your models here.
 
@@ -22,7 +24,8 @@ class Order(models.Model):
     status = models.CharField(max_length=50, choices=status_choices, default='receive')
     priority_level = models.CharField(max_length=30, choices=priority_level_choices, default='medium')
     destination_address = models.CharField(max_length=300)
-    total_price = models.DecimalField(max_digits=14, decimal_places=2, blank=True, null=True)
+    # https://stackoverflow.com/questions/12384460/allow-only-positive-decimal-numbers
+    total_price = models.DecimalField(max_digits=14, decimal_places=2, blank=True, null=True, validators=[MinValueValidator(Decimal('0.01'))])
 
     @staticmethod
     def gen_id():
@@ -65,9 +68,10 @@ class Order(models.Model):
 class Product(models.Model):
     product_name = models.CharField(max_length=200)
     category = models.CharField(max_length=100)
-    price = models.DecimalField(max_digits=14, decimal_places=2)
+    price = models.DecimalField(max_digits=14, decimal_places=2, validators=[MinValueValidator(Decimal('0.01'))])
     # sku is our Unique Identifier 
     sku = models.SlugField(blank=True, null=True, unique=True)   # Auto Generated 
+    date = models.DateField(auto_now_add=True)
 
 
     # Methods
@@ -106,7 +110,8 @@ class OrderItem(models.Model):
     order_item_slug = models.SlugField(null=True, blank=True, unique=True)
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='order_items')
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='order_items')
-    quantity = models.IntegerField(default=1)
+    quantity = models.IntegerField(default=1, validators=[MinValueValidator(0)])
+    date = models.DateField(auto_now_add=True)
 
     # Generating an order_id
     @staticmethod
@@ -144,11 +149,12 @@ class Inventory(models.Model):
     # Still use signals to create a Default Inventory, users could add more 
     # Think of it as One product could have multiple inventories from different warehouses   
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='inventories')  
-    stock = models.IntegerField(default=0)
-    stock_threshold = models.IntegerField(default=50)
+    stock = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    stock_threshold = models.IntegerField(default=50, validators=[MinValueValidator(0)])
     restock = models.BooleanField(default=True)
     # Since we're using signals to create, we'lll set the location field as optional
     location = models.CharField(max_length=300, null=True, blank=True)
+    date = models.DateField(auto_now_add=True)
 
     class Meta:
         verbose_name = 'Inventory'

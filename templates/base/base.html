@@ -41,7 +41,8 @@
                     {% endif %}              
                 </ul>
                 {% if user.is_authenticated %}
-                    <li class="nav-item dropdown me-5">
+                    {# On Mobile this dropdown will be overshadowed by our sidebar which has a z-index: 1020 #}
+                    <li class="nav-item dropdown me-5" style="z-index: 1021">
                         <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-person-circle"></i>
                           </button>
@@ -88,12 +89,12 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="#" class="nav-link py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Dashboard">
+                                <a href="{% url 'logistics_app:view_inventory'%}" class="nav-link py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Dashboard">
                                     <i class="bi-box fs-5"></i> Inventory
                                 </a>
                             </li>
                         {% else %}
-                            {% if user.role == 'Logistics Manager' %}
+                            {% if user.role == 'lm' %}
                                 {# Only enabling Orders & Reports #}
                                 <li class="nav-item">
                                     <a href="#" class="nav-link py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Home">
@@ -111,11 +112,11 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="#" class="nav-link disabled py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Dashboard">
+                                    <a href="{% url 'logistics_app:view_inventory'%}" class="nav-link disabled py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Dashboard">
                                         <i class="bi-box fs-5"></i> Inventory
                                     </a>
                                 </li>
-                            {% elif user.role == 'Drivers' %}
+                            {% elif user.role == 'drivers' %}
                                 {# Only enabling Routes #}
                                 <li class="nav-item">
                                     <a href="#" class="nav-link py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Home">
@@ -133,14 +134,14 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="#" class="nav-link disabled py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Dashboard">
+                                    <a href="{% url 'logistics_app:view_inventory'%}" class="nav-link disabled py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Dashboard">
                                         <i class="bi-box fs-5"></i> Inventory
                                     </a>
                                 </li>
-                            {% elif user.role == 'Warehouse Staff' %}
+                            {% elif user.role == 'ws' %}
                                 {# Only enabling Inventory #}
                                 <li>
-                                    <a href="#" class="nav-link py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Dashboard">
+                                    <a href="{% url 'logistics_app:view_inventory'%}" class="nav-link py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Dashboard">
                                         <i class="bi-box fs-5"></i> Inventory
                                     </a>
                                 </li>

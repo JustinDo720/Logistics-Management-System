@@ -5,5 +5,7 @@ from . import views
 app_name = 'logistics_app'  # accessible: logistics_app:path_name --> logistics_app:home 
 
 urlpatterns = [
-    path('', views.home_page, name='home')
+    path('', views.home_page, name='home'),
+    # Inventory Management
+    path('inventory/view/', views.view_inventory, name='view_inventory'),
 ]
