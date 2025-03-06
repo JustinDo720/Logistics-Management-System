@@ -5,5 +5,9 @@ from . import views
 app_name = 'workers'  # accessible: workers:path_name --> workers:register 
 
 urlpatterns = [
-    path('accounts/register/', views.register, name='register')
+    path('accounts/register/', views.register, name='register'),
+    path('accounts/clogin/', views.custom_login, name='custom_login'),
+    path('accounts/profile/<int:user_id>', views.profile, name='profile'),
+    path('accounts/profile/<int:user_id>/delete/', views.del_profile, name='profile_delete'),
+    path('accounts/clogout/', views.custom_logout, name='custom_logout')
 ]

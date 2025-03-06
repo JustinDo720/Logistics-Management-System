@@ -23,8 +23,20 @@
                                 <form method="POST" action="{% url 'workers:register' %}">
                                     {% csrf_token %}
                                     {{ register_form | crispy }}
+                                    {% comment %}
+                                      {# Handling Form Error #}
+                                      {% if register_form.errors %}
+                                        {% for field in register_form %}
+                                          {% for err in field.errors %}
+                                            <p class="text-danger">
+                                              {{ field.label }}: {{ err | escape }}
+                                            </p>
+                                          {% endfor %}
+                                        {% endfor %}
+                                      {% endif %}
+                                    {% endcomment %}
                                     <div class="text-center">
-                                        <button class="btn btn-outline-success">Sign Up</button>
+                                        <button type='submit' class="btn btn-outline-success">Sign Up</button>
                                     </div>
                                 </form>
                             </div>

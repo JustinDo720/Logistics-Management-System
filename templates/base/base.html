@@ -14,12 +14,18 @@
 
     {# bootstrap icons cdn #}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    {# favicon #}
+    {% load static %}
+    <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
 </head>
 <body>
     {# We need navbar-light or navbar-dark to see our collapse button #}
     <nav class="navbar navbar-expand-lg border-bottom border-body navbar-dark bg-dark">
         <div class="container-fluid">
-          <a class="navbar-brand" href="#">LMS Icon Here</a>
+          <a class="navbar-brand btn btn-sm btn-light" href="{% url 'logistics_app:home' %}">
+            {% load static %}
+            <img src="{% static 'Logistics_Management_System.png' %}" alt="LMS" width="35" height="5%">
+          </a>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
           </button>
@@ -30,32 +36,29 @@
                             <a class="nav-link" href="{% url 'workers:register'%}">Register</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" href="{% url 'login' %}">Login</a>
+                            <a class="nav-link active" aria-current="page" href="{% url 'workers:custom_login' %}">Login</a>
                         </li>
                     {% endif %}              
                 </ul>
                 {% if user.is_authenticated %}
-                    <li class="nav-item dropdown">
+                    {# On Mobile this dropdown will be overshadowed by our sidebar which has a z-index: 1020 #}
+                    <li class="nav-item dropdown me-5" style="z-index: 1021">
                         <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-person-circle"></i>
                           </button>
                         <ul class="dropdown-menu">
-                        <li><h6 class="dropdown-header">Current Role: {{ user.get_role_display }}</h6></li>
+                        <li><h6 class="dropdown-header fw-bold">{{ user.username | title }}</h6></li>     
+                        <li><h6 class="dropdown-header">{{ user.get_role_display }}</h6></li>
                         <li><hr class="dropdown-divider"></li>
                         
-                        <li><a class="dropdown-item" href="#">Profile</a></li>
+                        <li><a class="dropdown-item" href="{% url 'workers:profile' user_id=user.id%}">Profile</a></li>
                         <li class="text-center p-1">
-                            <a href="{% url 'logout' %}" class="d-grid gap-2" style="text-decoration: none;">
-                                <button class="btn btn-sm btn-outline-danger">
-                                    Log Out
-                                </button>
-                            </a>
                         </li>
                         </ul>
                     </li>
-                    <span style="color:whitesmoke" class="fw-bold shadow">
-                        &nbsp;Welcome {{ user.username | title }}!
-                    </span>
+                    <a href="{% url 'workers:custom_logout' %}" class="d-grid gap-2 btn btn-sm btn-danger" style="text-decoration: none;">
+                        Log Out
+                    </a>
                 {% endif %}   
           </div>
         </div>
@@ -86,12 +89,12 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="#" class="nav-link py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Dashboard">
+                                <a href="{% url 'logistics_app:view_inventory'%}" class="nav-link py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Dashboard">
                                     <i class="bi-box fs-5"></i> Inventory
                                 </a>
                             </li>
                         {% else %}
-                            {% if user.role == 'Logistics Manager' %}
+                            {% if user.role == 'lm' %}
                                 {# Only enabling Orders & Reports #}
                                 <li class="nav-item">
                                     <a href="#" class="nav-link py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Home">
@@ -109,11 +112,11 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="#" class="nav-link disabled py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Dashboard">
+                                    <a href="{% url 'logistics_app:view_inventory'%}" class="nav-link disabled py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Dashboard">
                                         <i class="bi-box fs-5"></i> Inventory
                                     </a>
                                 </li>
-                            {% elif user.role == 'Drivers' %}
+                            {% elif user.role == 'drivers' %}
                                 {# Only enabling Routes #}
                                 <li class="nav-item">
                                     <a href="#" class="nav-link py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Home">
@@ -131,14 +134,14 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="#" class="nav-link disabled py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Dashboard">
+                                    <a href="{% url 'logistics_app:view_inventory'%}" class="nav-link disabled py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Dashboard">
                                         <i class="bi-box fs-5"></i> Inventory
                                     </a>
                                 </li>
-                            {% elif user.role == 'Warehouse Staff' %}
+                            {% elif user.role == 'ws' %}
                                 {# Only enabling Inventory #}
                                 <li>
-                                    <a href="#" class="nav-link py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Dashboard">
+                                    <a href="{% url 'logistics_app:view_inventory'%}" class="nav-link py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Dashboard">
                                         <i class="bi-box fs-5"></i> Inventory
                                     </a>
                                 </li>
@@ -164,10 +167,45 @@
             </div>
             <div class="col-sm p-3 min-vh-100">
                 {% block content %}{% endblock %}
+                {% if messages %}
+                    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+                        {% for msg in messages %}
+                            <div id="liveToast" {% if msg.tags %} class="{{ msg.tags }} toast" {% else %} class='toast'{% endif %} role="alert" aria-live="assertive" aria-atomic="true">
+                            <div class="toast-header">
+                                <strong class="me-auto">Notification</strong>
+                                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                            </div>
+                            <div class="toast-body">
+                                {{ msg | safe }}
+                            </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+            {% endif %}
             </div>
         </div>
     </div>
     </div>
 </div>
+<script>
+    // Initialize Toast 
+    // https://joshkaramuth.com/blog/django-messages-toast-htmx/
+    function initToasts() {
+        const toastEls = document.querySelectorAll(".toast");
+        if(toastEls){
+            toastEls.forEach((el) => {
+                const toast = window.bootstrap.Toast.getOrCreateInstance(el);
+                toast.show();
+                el.addEventListener("hidden.bs.toast", () => {
+                  el.remove();
+                });
+              });
+        }
+      }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        initToasts();
+      });
+</script>
 </body>
 </html>

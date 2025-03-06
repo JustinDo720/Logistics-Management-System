@@ -29,3 +29,11 @@ class LMSWorker(AbstractUser):
     # String Representation 
     def __str__(self): 
         return f'{self.username}-{self.email}'
+    
+    # Handling Profile Icon 
+    def get_profile_icon(self):
+        # All image sources need urls
+        return self.profile_icon.url
+    
+    def get_profile_name(self):
+        return self.profile_icon.name
