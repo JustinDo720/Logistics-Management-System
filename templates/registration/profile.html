@@ -1,0 +1,131 @@
+{% extends 'base/base.html' %}
+
+{% block title %}LMS - Profile{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row g-3">
+            {# Profile Showcase #}
+            <div class="col-12 col-md-4">
+                <div class="container">
+                    <div class="card  border-light shadow-sm p-1 rounded" style="background: #e3f2fd;">
+                        {% if my_user.profile_icon %}
+                            <img src="{{ my_user.get_profile_icon }}" class="card-img-top" alt="...">
+                        {% endif %}
+                        <div class="card-body ">
+                          <h3 class="card-title fw-bold">{{ my_user.username }}</h3>
+                          <h6 class="card-subtitle mb-2 text-secondary">Hired On: {{ my_user.hired_date }}</h6>
+                          <ul class="list-group mt-3">
+                            <li class="list-group-item list-group-item-primary">Contact: {{ my_user.email }}</li>
+                            <li class="list-group-item list-group-item-primary">Working As: {{ my_user.get_role_display }}</li>
+                          </ul>
+                          <div class="text-center mt-2">
+                            {# Modal Trigger #}
+                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#delConfirmation">
+                                Delete Profile
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                </div>
+            </div>
+            {# Profile Update #}
+            <div class="col-12 col-md-8">
+                <div class="container">
+                    <div class="card text-light bg-dark border-light shadow-sm p-1 rounded">
+                        <div class="card-body">
+                          <h5 class="card-title fs-3 fw-bold mb-3">Update Profile Information</h5>
+                           {# Because we're working with files we need a multipart/form-data #}
+                           <form method="POST" action="{% url 'workers:profile' user_id=my_user.id %}" enctype="multipart/form-data">
+                            {% csrf_token %}
+                                <div class="row row-cols-1 row-cols-md-2 mb-4 g-4">
+                                    <div class="col">
+                                        <label for="username" class="form-label">
+                                            {{ form.username.label }}
+                                        </label>
+                                        {{ form.username }}
+                                        <div class="form-text text-warning">{{ form.username.help_text }}</div>
+                                    </div>
+                                    <div class="col">
+                                        <label for="email" class="form-label">
+                                            {{ form.email.label }}
+                                        </label>
+                                        {{ form.email }}
+                                    </div>
+                                    <div class="col">
+                                        <label for="new_password" class="form-label">
+                                            {{ form.new_password.label }}
+                                        </label>
+                                        {{ form.new_password }}
+                                        <div class="form-text text-info">{{ form.new_password.help_text }}</div>
+                                    </div>
+                                    <div class="col">
+                                        <label for="role" class="form-label">
+                                            {{ form.role.label }}
+                                        </label>
+                                        {{ form.role }}
+                                        <div class="form-text text-info">{{ form.role.help_text }}</div>
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <label for="profile_icon" class="form-label">
+                                        {{ form.profile_icon.label }}
+                                    </label>
+                                    {{ form.profile_icon }}
+                                    {% if my_user.profile_icon %}
+                                    <span class="mt-2">
+                                        Current Profile Icon: <a href="{{ my_user.get_profile_icon }}">{{ my_user.get_profile_name }}</a>
+                                    </span>
+                                    
+                                    {% endif %}
+                                </div>
+                                {# Handling Form Errs #}
+                                <div class="row row-cols-1 row-cols-md-2 mb-4 g-3">
+                                    {% if form.errors %}
+                                        {% for field in form %}
+                                            {% for err in field.errors %}
+                                                <div class="col">
+                                                    <p class="text-danger">
+                                                        {{ field.label }}: {{ err | escape }}
+                                                    </p>
+                                                </div>
+                                            {% endfor %}
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+                                <div class="text-center">
+                                    <button class="btn btn-outline-warning">Update My Information</button>
+                                </div>
+                           </form>
+                        </div>
+                      </div>
+                </div>
+            </div>
+            {# Confirm Delete Profile #}
+            
+            <!-- Modal -->
+            <div class="modal fade" id="delConfirmation" tabindex="-1" aria-labelledby="delConfirmationLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Confirmation</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        Are you sure you want to remove your Profile?
+                    </div>
+                    <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <form method='POST' action="{% url 'workers:profile_delete' user_id=my_user.id %}">
+                        {% csrf_token %}
+                        <button class="btn btn-sm btn-danger">
+                           Confirm Delete
+                        </button>
+                    </form>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

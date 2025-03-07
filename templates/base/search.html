@@ -1,0 +1,42 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12 col-md-1"></div>
+            <div class="col-12 col-md-10">
+                <div class="row">
+                    <div class="card p-2 rounded-start border-3" style="background: #e3f2fd;">
+                        <div class="card-body">
+                            <h3 class="card-title text-center fw-bolder">Logistics Management System</h3>
+                            <div class="col-12 col-md-8 m-auto mt-4 mb-4">
+                                {# Customizing Form based on Child template: https://stackoverflow.com/questions/36963802/is-there-a-way-to-pass-a-variable-to-an-extended-template-in-django #}
+                                {% block custom_search %}
+                                    <form class="shadow-lg" method="GET">
+                                        {# Because we're submitting a GET method it'll return us to our view with url params which means no need for csrf #}
+                                        <div class="input-group input-group-lg">
+                                            <input type="text" class="form-control" 
+                                                    placeholder="{{ placholder }}" 
+                                                    aria-label="searching" 
+                                                    aria-describedby="searching-1"
+                                                    name="{{ name }}">
+                                            <button class="btn btn-outline-success">
+                                                <i class="bi bi-search"></i>
+                                            </button>
+                                        </div>                                  
+                                    </form>
+                                {% endblock %}
+                            </div>
+                        </div>
+                        </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-1"></div>
+        </div>
+    </div>
+    <div class="mt-5">
+        <div class="container bg-dark p-4 rounded" style="overflow-y:scroll; max-height:40rem;">
+            {% block main_content %} {% endblock %}
+        </div>
+    </div>
+{% endblock %}
