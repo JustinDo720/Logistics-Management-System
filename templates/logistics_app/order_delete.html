@@ -1,0 +1,23 @@
+
+{#  Make sure we extend from base/base.html everytime (templates/base/base.html) #}
+{% extends 'base/base.html' %}
+
+{# Block title  to Update our title #}
+
+{% block title %}
+    Order Delete 
+{% endblock %}
+
+{# Content is to modify everything that's within our Body #}
+{% block content %}
+
+
+<form method="post">
+    {% csrf_token %}
+    <p>Are you sure you want to delete this order?</p>
+    <button class="btn btn-warning" type="submit">Yes, Delete</button>
+    <a href="{% url 'logistics_app:order_list' %}" class="btn btn-secondary">Cancel</a>
+</form>
+
+
+{% endblock %}

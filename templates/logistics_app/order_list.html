@@ -10,13 +10,15 @@
 {# Content is to modify everything that's within our Body #}
 {% block content %}
 
+{# script to use font awesome's icons #}
+<script src="https://kit.fontawesome.com/9eb66d4679.js" crossorigin="anonymous"></script>
 
 <div class="d-flex justify-content-between">
-    <a class="btn btn-info">Create Order</a>
+    <a href="{% url 'logistics_app:order_create' %}" class="btn btn-info">Create Order</a>
     
     <form action="{% url 'logistics_app:order_list' %}" method="GET">
         <input type="search" name="query" placeholder="Search..." value="{{ request.GET.query }}">
-        <button class="btn btn-info" type="submit">Search</button>
+        <button class="btn btn-info" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
     </form>
 </div>
 
@@ -44,8 +46,8 @@
                 <td>{{order.total_price}}</td>
                 <td>
                     <a href="{% url 'logistics_app:order_detail' pk=order.id %}" class="btn btn-info">View</a>
-                    <a class="btn btn-primary">Update</a>
-                    <a class="btn btn-danger">Delete</a>
+                    <a href="{% url 'logistics_app:order_update' pk=order.id %}" class="btn btn-primary">Update</a>
+                    <a href="{% url 'logistics_app:order_delete' pk=order.id %}" class="btn btn-danger">Delete</a>
 
                 </td>
             </tr>

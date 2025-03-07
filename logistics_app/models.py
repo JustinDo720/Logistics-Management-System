@@ -4,7 +4,7 @@ from django.db import models
 
 class Order(models.Model):
     status_choices = [
-        ('Receive', 'Received'),
+        ('Received', 'Received'),
         ('In-Transit', 'In Transit'),
         ('Delivered', 'Delivered')
     ]
