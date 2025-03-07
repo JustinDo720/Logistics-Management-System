@@ -1,0 +1,30 @@
+{#  Make sure we extend from base/base.html everytime (templates/base/base.html) #}
+{% extends 'base/base.html' %}
+
+{# Block title  to Update our title #}
+
+{% block title %}
+    Order Update 
+{% endblock %}
+
+{# Content is to modify everything that's within our Body #}
+{% block content %}
+
+<h1 class="text-center">Update the order</h1>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+
+            <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button class="btn btn-success form-control" type="submit">Update</button>
+            </form>
+    
+            <br>
+            <a class="btn btn-secondary" href="{% url 'logistics_app:order_list' %}">Back to List</a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

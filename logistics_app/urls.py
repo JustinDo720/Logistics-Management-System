@@ -17,5 +17,8 @@ urlpatterns = [
 
     # Order Management
     path('orders/',views.order_list_view, name='order_list'),
+    path('order/create', views.order_create_view, name='order_create'),
     path('orderdetail/<int:pk>/',views.order_detail_view, name='order_detail'),
+    path('order/update/<int:pk>/',views.order_update_view, name='order_update'),
+    path('order/delete/<int:pk>/', views.order_delete_view, name='order_delete')
 ]

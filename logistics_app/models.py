@@ -8,7 +8,7 @@ from decimal import Decimal
 
 class Order(models.Model):
     status_choices = [
-        ('Receive', 'Received'),
+        ('Received', 'Received'),
         ('In-Transit', 'In Transit'),
         ('Delivered', 'Delivered')
     ]
