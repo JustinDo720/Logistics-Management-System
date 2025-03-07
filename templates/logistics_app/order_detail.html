@@ -10,17 +10,27 @@
 {# Content is to modify everything that's within our Body #}
 {% block content %}
 
-<h1>Order Details</h1>
-    <ul>
-        <li>Customer Name: {{order.customer_name}}</li>
-        <li>Order Date: {{order.date}}</li>
-        <li>Status: {{order.status}}</li>
-        <li>Priority Level: {{order.priority_level}}</li>
-        <li>Destination Address: {{order.destination_address}}</li>
-        <li>Price: {{order.total_price}}</li>
-       
-    </ul>
-    <a class="btn btn-secondary" href="{% url 'logistics_app:order_list' %}">Back to List</a>
+<h1 class="text-center">Order Details</h1>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <ul class="list-group">
+                <li class="list-group-item active">Customer Name: {{order.customer_name}}</li>
+                <li class="list-group-item">Order Date: {{order.date}}</li>
+                <li class="list-group-item">Status: {{order.status}}</li>
+                <li class="list-group-item">Priority Level: {{order.priority_level}}</li>
+                <li class="list-group-item">Destination Address: {{order.destination_address}}</li>
+                <li class="list-group-item">Price: {{order.total_price}}</li>
+            </ul>
+            <br>
+            <a class="btn btn-secondary" href="{% url 'logistics_app:order_list' %}">Back to List</a>
+
+        </div>
+    </div>
+</div>
+
+
 
 
 {% endblock %}
