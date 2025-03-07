@@ -20,6 +20,26 @@ Our [Flowchart](flowchart_&_usecase/TekBasic_-_Flowchart.jpg) and [User Story](f
 
 ## Update Logs 
 **03/05**
+- [OpenRouteServices](https://openrouteservice.org/) | [Stripe](https://stripe.com/) NO TIME => Django email 
+  -  [Getting Directions](https://www.youtube.com/watch?v=xBxWuq8SR6k)
+  -  MAYBE [Rout Optimization](https://youtu.be/OOCvhc0k1R4?si=UVgdZ-y9n1AZDisy)
+- Forgot Password 
+  - we'll use a real [reset password](https://dev.to/earthcomfy/django-reset-password-3k0l) 
+  - requires an actual working email 
+  - Setting up Django Emails 
+    - Google acc --> Turn **on** 2 factor auth --> **app passwords**
+    - add app pass + email to `.env`  
+  - We inherited from `PasswordResetView` creatin an email template body, subject template txt file and success url once we send out the email
+  - Inside that email, we have a link to our custom `PasswordResetConfirmView` which renders out our form that takes *new_password* and *confirm new_password* but **also** redirects us to a success page: `PasswordResetCompleteView` 
+    - All of these views are `from django.contrib.auth import views as auth_views`
+- View Specific Inventory based off SKU
+- Update & Remove Inventory
+- **When you update a product, make sure the slug field also updates**
+- ~~Work with FOrm Errors (Inventory + Product)~~
+- ~~Work with Inventory Search~~
+- ~~LowStock => Email or Message/Toast~~
+
+**03/05**
 - Handling Product/Inventory Signal 
 - Update Total Price Signal 
 - Django Commands to insert Fake Data?

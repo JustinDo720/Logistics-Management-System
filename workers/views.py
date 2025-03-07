@@ -9,6 +9,9 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
+from django.contrib.auth.views import PasswordResetView, PasswordResetConfirmView
+from django.contrib.messages.views import SuccessMessageMixin
+from django.urls import reverse_lazy
 # Create your views here.
 
 
@@ -109,3 +112,25 @@ def custom_logout(request):
     # Displaying a logout message 
     messages.info(request, "You've been logged out from our system.")
     return redirect('logistics_app:home')
+
+def forgot_password(request):
+    return render(request, 'workers/forgot_password.html')
+
+class EmailResetPassword(SuccessMessageMixin, PasswordResetView):
+    template_name = 'workers/forgot_password.html'
+    # Generating the body of our email
+    email_template_name = 'workers/password_reset_email.html'
+    # Generating the subject of our email
+    subject_template_name = 'workers/password_reset_subject.txt'
+    success_message = """
+        If there's an account associated with that email, we've sent you instructions to reset your password.
+        Please note: if you didn't recieve an email, make sure you've entered in the correct email
+    """
+    # AFTER an email was potentially sent 
+    success_url = reverse_lazy('login')
+
+# There's an issue where once we submit our form, it actually sends us to the Django Admin Page
+# So... Lets make our custom ResetConfirmView and send us to the the ResetCompleteView if we're successful
+class CustomPasswordResetConfirmView(PasswordResetConfirmView):
+    template_name = 'workers/password_reset_confirm.html'
+    success_url = reverse_lazy('workers:password_reset_complete') 

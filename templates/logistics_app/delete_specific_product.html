@@ -1,0 +1,59 @@
+{% extends 'base/base.html' %}
+
+{% block title %}LMS - Product | Remove {% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 col-md-1"></div>
+    <div class="col-12 col-md-10">
+        <h3 class="text-center fw-bold mt-3">
+            {% load static %}
+            <img src="{% static 'Logistics_Management_System.png' %}" alt="..." width="55" height="60"> Logistics Management System
+        </h3>
+        <p class="text-center fw-medium text-secondary mb-3">
+            Removing <b>"{{ product.sku }}"</b>
+        </p>
+        <div class="row">
+            <div class="col-12 col-md-8 m-auto">
+                <span class="border-top border-danger border-5"></span>
+                <div class="card bg-light shadow rounded">
+                    <span class="border-top border-danger border-5"></span>
+                    <div class="card-body p-4">
+                        <h6 class="card-subtitle mb-2 text-body-secondary">
+                            <div class="row">
+                                <div class="col-12 col-md-3 text-end text-danger">
+                                    <i class="bi bi-trash fs-3"></i>
+                                </div>
+                                <div class="col-12 col-md-8">
+                                    Confirm with us to remove this product.
+                                </div>
+                            </div>
+                        </h6>
+                        <form method="POST" action="{% url 'logistics_app:delete_specific_product' sku=product.sku%}">
+                            {% csrf_token %}
+                                <p class="fw-semibold">Are you sure you want to remove <b>"{{ product.product_name }}"</b> along with all the associated <b>inventories.</b></p>
+                            
+                            <hr>
+                            <div class="text-center">
+                                <button class="btn btn-danger"><i class="bi bi-trash-fill"></i> Remove Product</button>
+                            </div>     
+                        </form>
+                    </div>
+                    <div class="card-footer text-secondary">
+                        <div class="row">
+                            <div class="col-12 col-md-6 text-start">
+                                Changed your mind?
+                            </div> 
+                            <div class="col-12 col-md-6 text-end">
+                                <a href="{% url 'logistics_app:view_inventory' %}" class="btn btn-sm btn-outline-primary">Return</a>
+                            </div> 
+                        </div>
+                    </div>
+                    
+                  </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-1"></div>
+</div>
+{% endblock %}

@@ -20,6 +20,7 @@ def home_page(request):
 
 # Product & Inventory Management 
 # CRUD - Inventory 
+@login_required()
 def view_inventory(request):
     """
         This view could serve three purposes:
@@ -93,6 +94,97 @@ def view_inventory(request):
             context['inv_form'] = inv_form 
             return render(request, gen_temp('inventory_view.html'), context=context)
 
+@login_required()
+def view_specific_product(request, sku):
+    prod = get_object_or_404(Product, sku=sku)
+    context = {
+        'product':prod, 
+        'inventories': prod.inventories.all().order_by('-restock'),
+    }
+
+    # Total Amount of Inventories 
+    total = context['inventories'].count()
+    context['total_inv'] = total
+    
+    # Average Quantity 
+    inventories = context['inventories']
+    context['average_stock'] = sum(inv.stock for inv in inventories) // total
+
+    # Needs to restock 
+    inventory_restock = prod.inventories.filter(restock=True).count()
+    context['amount_to_restock'] = inventory_restock
+
+    # Health Check: below 30% is critial 50% is okay and above 50% is good 
+    health_percentage = ((total-inventory_restock) / total) * 100
+    if health_percentage <= 30:
+        context['health_check'] = 'CRITICAL'
+    elif health_percentage > 30 and health_percentage <= 50:
+        context['health_check'] = 'OK'
+    else:
+        context['health_check'] = 'HEALTHY'
+
+    return render(request, gen_temp('specific_product.html'), context)
+
+@login_required()
+def update_specific_product(request, sku):
+    prod = get_object_or_404(Product, sku=sku)
+    if request.method == 'GET':
+        product_form = ProductF(instance=prod)
+        return render(request, gen_temp('update_specific_product.html'), {'prod_form':product_form, 'product': prod})
+    else:
+        # Post Request 
+        product_form = ProductF(instance=prod, data=request.POST)
+        if product_form.is_valid():
+            product_form.save()
+            messages.warning(request, 'Successfully Updated Your Product')
+            return redirect('logistics_app:view_specific_product', sku=sku)
+        else:
+            messages.error(request, 'There was an issue updating your product')
+        
+        # Handling Form Errors
+        render(request, gen_temp('update_specific_product.html'), {'prod_form':product_form, 'product': prod})
+
+@login_required()
+def delete_specific_product(request, sku):
+    prod = get_object_or_404(Product, sku=sku)
+    if request.method == 'GET':
+        return render(request, gen_temp('delete_specific_product.html'), {'product':prod})
+    else:
+        # Posting (Confirms to delete)
+        prod.delete()
+        messages.error(request, 'Your product has been removed.')
+        return redirect('logistics_app:view_inventory')
+    
+@login_required()
+def update_specific_inventory(request, id):
+    inv = get_object_or_404(Inventory, id=id)
+    if request.method == 'GET':
+        inv_form = InventoryF(instance=inv)
+        return render(request, gen_temp('update_specific_inventory.html'), {'inv_form': inv_form, 'inv':inv})
+    else:
+        # Post Request 
+        inv_form = InventoryF(instance=inv, data=request.POST)
+        if inv_form.is_valid():
+            inv_form.save()
+            messages.warning(request, 'Successfully Updated Your Iventory for this Product')
+            return redirect('logistics_app:view_specific_product', sku=inv.product.sku)
+        else:
+            messages.error(request, 'There was an issue updating your inventory.')
+        
+        # Handling Form Errors
+        return render(request, gen_temp('update_specific_inventory.html'), {'inv_form': inv_form, 'inv':inv})
+    
+@login_required
+def delete_specific_inventory(request, id):
+    inv = get_object_or_404(Inventory, id=id)
+    if request.method == 'POST':
+        inv.delete()
+        messages.error(request, 'Removed an Inventory.')
+        return redirect('logistics_app:view_specific_product', sku=inv.product.sku)
+    messages.error(request, 'There was some issue in the backend.')
+    return redirect('logistics_app:view_specific_product', sku=inv.product.sku)
+
+# CRUD - Orders
 def order_list_view(request):
     query = request.GET.get('query', '')
     if query:

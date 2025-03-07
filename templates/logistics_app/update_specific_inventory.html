@@ -1,0 +1,109 @@
+{% extends 'base/base.html' %}
+
+{% block title %}LMS - Inventory | Update {% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 col-md-1"></div>
+    <div class="col-12 col-md-10">
+        <h3 class="text-center fw-bold mt-3">
+            {% load static %}
+            <img src="{% static 'Logistics_Management_System.png' %}" alt="..." width="55" height="60"> Logistics Management System
+        </h3>
+        <p class="text-center fw-medium text-secondary mb-3">
+            Updating Inventory For: <b>"{{ inv.product.sku }}"</b>
+        </p>
+        <div class="row">
+            <div class="col-12 col-md-8 m-auto">
+                <span class="border-top border-warning border-5"></span>
+                <div class="card bg-light shadow rounded">
+                    <span class="border-top border-warning border-5"></span>
+                    <div class="card-body p-3">
+                        <h6 class="card-subtitle mb-2 text-body-secondary">
+                            <div class="row">
+                                <div class="col-12 col-md-3 text-end text-warning">
+                                    <i class="bi bi-pencil fs-3"></i>
+                                </div>
+                                <div class="col-12 col-md-8">
+                                    Find the information you want to edit then update it with a new value.
+                                </div>
+                            </div>
+                        </h6>
+                        <form method="POST" action="{% url 'logistics_app:update_specific_inventory' id=inv.id %}">
+                            {% csrf_token %}
+                            <p class="fw-bold text-info">
+                                Restock: Make sure your Quantity is higher than your Threshold
+                            </p>
+                            <div class="row row-cols-1 row-cols-md-2">
+                                {% for field in inv_form %}
+                                <div class="col m-auto">
+                                    <div class="form-floating mb-3 mt-3">
+                                        {{ field }}
+                                        <label for="{{ field.id }}" class="text-dark">{{ field.label }}</label>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                            </div>
+                            {# Handling Error Messages #}
+                            <div class="row row-cols-1 row-cols-md-3">
+                                {% if inv_form.errors %}
+                                    {% for field in inv_form %}
+                                        {% for err in field.errors %}
+                                            <p class="text-danger">
+                                                {{ field.label }}: {{ err | safe}}
+                                            </p>
+                                        {% endfor %}
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                            <hr>
+                            <div class="text-center">
+                                <button class="btn btn-warning"><i class="bi bi-pencil-fill"></i> Update Inventory</button>
+                            </div>     
+                        </form>
+                    </div>
+                    <div class="card-footer text-secondary">
+                        <div class="row">
+                            <div class="col-12 col-md-6 text-start">
+                                <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteInventory">
+                                    Delete Inventory
+                                  </button>                                  
+                            </div> 
+                            <div class="col-12 col-md-6 text-end">
+                                <a href="{% url 'logistics_app:view_specific_product' sku=inv.product.sku %}" class="btn btn-sm btn-outline-primary">Return</a>
+                            </div> 
+                        </div>
+                    </div>
+                    
+                  </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-1"></div>
+</div>
+<div class="modal fade" id="deleteInventory" tabindex="-1" aria-labelledby="deleteInventoryLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="deleteInventoryLabel">Confirm</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <p class="text-secondary">
+                Are you sure you want to remove this inventory from <b>{{ inv.product.sku }}</b>?
+            </p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+          <form action="{% url 'logistics_app:delete_specific_inventory' id=inv.id %}" method="POST">
+                {% csrf_token %}
+                <button class="btn btn-sm btn-danger">
+                    Remove Inventory
+                </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+{% endblock %}

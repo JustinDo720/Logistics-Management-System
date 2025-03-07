@@ -15,7 +15,7 @@
 
 {% endcomment %}
 {% block custom_search %}
-    {% with placholder="Search inventory by SKU" name='product_sku' %}
+    {% with placholder="Search SKU..." name='product_sku' %}
         {{ block.super }}
     {% endwith %}
 {% endblock %}
@@ -56,15 +56,15 @@
                 <td>{{ prod_i.product.price }}</td>
                 <td>
                     <div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
-                        <button type="button" class="btn btn-outline-danger">
+                        <a href="{% url 'logistics_app:delete_specific_product' sku=prod_i.product.sku%}" class="btn btn-outline-danger">
                             <i class="bi bi-trash3-fill"></i>
-                        </button>
-                        <button type="button" class="btn btn-outline-primary">
+                        </a>
+                        <a href="{% url 'logistics_app:view_specific_product' sku=prod_i.product.sku%}" class="btn btn-outline-primary">
                             <i class="bi bi-card-text"></i>
-                        </button>
-                        <button type="button" class="btn btn-outline-warning">
+                        </a>
+                        <a href="{% url 'logistics_app:update_specific_product' sku=prod_i.product.sku%}" class="btn btn-outline-warning">
                             <i class="bi bi-pen"></i>
-                        </button>
+                        </a>
                     </div>
                 </td>
             </tr>
