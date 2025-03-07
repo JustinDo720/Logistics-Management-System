@@ -23,7 +23,6 @@ Our [Flowchart](flowchart_&_usecase/TekBasic_-_Flowchart.jpg) and [User Story](f
 - [OpenRouteServices](https://openrouteservice.org/) | [Stripe](https://stripe.com/) NO TIME => Django email 
   -  [Getting Directions](https://www.youtube.com/watch?v=xBxWuq8SR6k)
   -  MAYBE [Rout Optimization](https://youtu.be/OOCvhc0k1R4?si=UVgdZ-y9n1AZDisy)
-- LowStock => Email or Message/Toast
 - Forgot Password 
   - we'll use a real [reset password](https://dev.to/earthcomfy/django-reset-password-3k0l) 
   - requires an actual working email 
@@ -35,6 +34,10 @@ Our [Flowchart](flowchart_&_usecase/TekBasic_-_Flowchart.jpg) and [User Story](f
     - All of these views are `from django.contrib.auth import views as auth_views`
 - View Specific Inventory based off SKU
 - Update & Remove Inventory
+- **When you update a product, make sure the slug field also updates**
+- ~~Work with FOrm Errors (Inventory + Product)~~
+- ~~Work with Inventory Search~~
+- ~~LowStock => Email or Message/Toast~~
 
 **03/05**
 - Handling Product/Inventory Signal 
