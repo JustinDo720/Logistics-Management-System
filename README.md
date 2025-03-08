@@ -19,11 +19,33 @@ Our [UML](UML%20&%20Sketches/lms_uml.PNG) class diagrams will help us create our
 Our [Flowchart](flowchart_&_usecase/TekBasic_-_Flowchart.jpg) and [User Story](flowchart_&_usecase/tek_basic_LMS_spreadsheet.png) helps us map out the workflow of our logistic management system 
 
 ## Update Logs 
+
+**03/08**
+- [x] Fix redirect Product Update Delete
+- [x] Pre-save logic checks state transition: if restock goes from `False` to `True` we email  
+- [x] Ensure Users are notified if the inventory goes low via email 
+  - Since notifications aren't our full focus let's just add a "Remove All Notifcations" Button 
+- [ ] Practice ORS + Folium on Jupyter Notebook first (similarize syntax, api key etc)
+- [ ] When confident, build our your Django 
+- [ ] Working on **Drivers** User story:
+  - Build shipment tracking page 
+  - Search functionality (Tracking number, pickup/delivery address) (Chain Queries)
+  - View Tracking information (Specific Shipment)
+  - ^ Included maps for routes + eta
+    - **GET** REquest no need to Post/Delete/Put
+- 
+
 **03/07**
-- Work with FOrm Errors (Inventory + Product)
-- Work with Inventory Search
+- Work with FOrm Errors (Inventory + Product) (Done)
+- Work with Inventory Search (Done)
 - LowStock => Email or Message/Toast 
-  - Decrease inventory when an order was made? 
+  - Standalone Inventory ONLY (Done)
+  - Alert Setting check box?
+    - Checkbox --> `request.POST.getlist('checkbox_name')` --> If notification doesnt exist in **InventoryNotification** model, then we add
+    - Signal --> Restock is set --> send email to ALL users who requested to be notified 
+      - Notified Flag if True then we won't send another email (prevents spamming )
+      - ~~Pre-save logic checks state transition: if restock goes from `False` to `True` we email~~  
+- ~~Decrease inventory when an order was made?~~ 
 
 **03/06**
 - [OpenRouteServices](https://openrouteservice.org/) | [Stripe](https://stripe.com/) NO TIME => Django email 

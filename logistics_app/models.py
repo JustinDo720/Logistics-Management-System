@@ -3,6 +3,9 @@ from django.utils.text import slugify
 from random import randint 
 from django.core.validators import MinValueValidator
 from decimal import Decimal
+from workers.models import LMSWorker
+from django.core.mail import send_mail
+from django.conf import settings
 
 # Create your models here.
 
@@ -152,6 +155,7 @@ class Inventory(models.Model):
     stock = models.IntegerField(default=0, validators=[MinValueValidator(0)])
     stock_threshold = models.IntegerField(default=50, validators=[MinValueValidator(0)])
     restock = models.BooleanField(default=True)
+    notified = models.BooleanField(default=False)   # Preventing Email Spam 
     # Since we're using signals to create, we'lll set the location field as optional
     location = models.CharField(max_length=300, null=True, blank=True)
     date = models.DateField(auto_now_add=True)
@@ -160,10 +164,56 @@ class Inventory(models.Model):
         verbose_name = 'Inventory'
         verbose_name_plural = 'Inventories' 
 
+    # Sending Email 
+    def send_notification(self):
+        # Assuming we handled the Restock logic in signals.py 
+        if not self.notified: 
+            # Send Notification 
+            self.notified = True 
+            # Grabbing all our users that want to be notified with this Inventory 
+            users_to_notify = self.notifications.all()
+            # We access all the potential notification object from that queryset: access the user to access their emails
+            emails = [notify_obj.user.email for notify_obj in users_to_notify]
+            if emails:
+                res = send_mail(
+                        "Low Stock Alert",
+                        f"The stock for {self.product.product_name} is low at the inventory location:  {self.location} ID:{self.id}!",
+                        settings.EMAIL_HOST_USER,
+                        emails,
+                        fail_silently=True, # doesn't crash our program
+                    )
+                return res
+
     # Checking stock
     def check_inv(self):
         # Trigger Restock notification (Maybe email works but for now...)
         self.restock = True if self.stock <= self.stock_threshold else False 
+        return self.restock
+
 
     def __str__(self):
         return f'{self.product.product_name}: {self.stock} left' if not self.restock else f'{self.product.product_name}: NEEDS RESTOCK! {self.stock}/{self.stock_threshold}'
+
+class InventoryNotification(models.Model):
+    # Inventory will have access Users who want to stay updated with that inventory 
+    # If that inventory turns low it sends an email to ALL users that want to stay notified 
+    inventory = models.ForeignKey(Inventory, on_delete=models.CASCADE, related_name='notifications')
+    # Of course we need to find the user who wants to be associated with this notification to access email 
+    user = models.ForeignKey(LMSWorker, on_delete=models.CASCADE, related_name='notifications')
+    created_at = models.DateTimeField(auto_now_add=True)
+    notification_slug = models.SlugField(blank=True, null=True, unique=True)
+
+    # With notification slug we could find if the user accidentally notified twice 
+    def gen_slug(self):
+        slug = f'{self.user.username}-{self.inventory.location}-{slugify(self.inventory.product.product_name)}'
+        
+        # We don't need to check for unqiueness because we want there to be exactly one record of the users notification 
+        return slug 
+    
+    def save(self, *args, **kwargs):
+        if not self.notification_slug:
+            self.notification_slug = self.gen_slug() 
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.notification_slug

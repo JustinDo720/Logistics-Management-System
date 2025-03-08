@@ -93,6 +93,11 @@
                                     <i class="bi-box fs-5"></i> Inventory
                                 </a>
                             </li>
+                            <li>
+                                <a href="{% url 'logistics_app:view_products'%}" class="nav-link py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Dashboard">
+                                    <i class="bi bi-boxes"></i> Product
+                                </a>
+                            </li>
                         {% else %}
                             {% if user.role == 'lm' %}
                                 {# Only enabling Orders & Reports #}
@@ -114,6 +119,11 @@
                                 <li>
                                     <a href="{% url 'logistics_app:view_inventory'%}" class="nav-link disabled py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Dashboard">
                                         <i class="bi-box fs-5"></i> Inventory
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'logistics_app:view_products'%}" class="nav-link disabled py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Dashboard">
+                                        <i class="bi bi-boxes"></i> Product
                                     </a>
                                 </li>
                             {% elif user.role == 'drivers' %}
@@ -138,11 +148,21 @@
                                         <i class="bi-box fs-5"></i> Inventory
                                     </a>
                                 </li>
+                                <li>
+                                    <a href="{% url 'logistics_app:view_products'%}" class="nav-link disabled py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Dashboard">
+                                        <i class="bi bi-boxes"></i> Product
+                                    </a>
+                                </li>
                             {% elif user.role == 'ws' %}
-                                {# Only enabling Inventory #}
+                                {# Only enabling Inventory & Products #}
                                 <li>
                                     <a href="{% url 'logistics_app:view_inventory'%}" class="nav-link py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Dashboard">
                                         <i class="bi-box fs-5"></i> Inventory
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'logistics_app:view_products'%}" class="nav-link py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Dashboard">
+                                        <i class="bi bi-boxes"></i> Product
                                     </a>
                                 </li>
                                 <li class="nav-item">

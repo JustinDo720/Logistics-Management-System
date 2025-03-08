@@ -5,7 +5,7 @@ from .forms import RoomUpdateForm, RoomCreateForm
 from django.urls import reverse_lazy
 from django.shortcuts import render, redirect, get_object_or_404
 from workers.models import LMSWorker
-from .models import Product, Inventory, Order
+from .models import Product, Inventory, Order, InventoryNotification
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q  # Searching 
 from .forms import InventoryF, ProductF
@@ -19,9 +19,9 @@ def home_page(request):
     return render(request, gen_temp('home.html'))
 
 # Product & Inventory Management 
-# CRUD - Inventory 
+# CRUD - Product
 @login_required()
-def view_inventory(request):
+def view_products(request):
     """
         This view could serve three purposes:
             1) Searching via GET request (with url params) because we could catch that url param value 
@@ -63,7 +63,7 @@ def view_inventory(request):
         context['inv_form'] = inv_form 
         context['prod_form'] = prod_form 
         
-        return render(request, gen_temp('inventory_view.html'), context=context)
+        return render(request, gen_temp('product_view.html'), context=context)
     if request.method == 'POST':
         if 'product_name' in request.POST and 'category' in request.POST and 'price' in request.POST:
             # We're using the product form 
@@ -71,28 +71,28 @@ def view_inventory(request):
             if prod_form.is_valid():
                 prod_form.save()
                 messages.success(request, 'Product Created Successfully!')
-                return redirect('logistics_app:view_inventory')
+                return redirect('logistics_app:view_products')
             else: 
                 messages.error(request, 'Failed To Create Product!')
             
             # Handling Form Errors 
             # Overriding the GET method form 
             context['prod_form'] = prod_form 
-            return render(request, gen_temp('inventory_view.html'), context=context)
+            return render(request, gen_temp('product_view.html'), context=context)
         else:
             # This means we're supposed to use the Inventory Form 
             inv_form = InventoryF(data=request.POST)
             if inv_form.is_valid():
                 inv_form.save()
                 messages.success(request, 'Inventory Created Successfully!')
-                return redirect('logistics_app:view_inventory')
+                return redirect('logistics_app:view_products')
             else: 
                 messages.error(request, 'Failed To Create Inventory!')
 
             # Handling Form Errors 
             # Overriding the GET method form 
             context['inv_form'] = inv_form 
-            return render(request, gen_temp('inventory_view.html'), context=context)
+            return render(request, gen_temp('product_view.html'), context=context)
 
 @login_required()
 def view_specific_product(request, sku):
@@ -177,8 +177,46 @@ def delete_specific_product(request, sku):
         # Posting (Confirms to delete)
         prod.delete()
         messages.error(request, 'Your product has been removed.')
-        return redirect('logistics_app:view_inventory')
+        return redirect('logistics_app:view_products')
+
+# ----- Inventory 
+@login_required()
+def view_inventory(request):
+    # Search Method
+    product_sku = request.GET.get('product_sku')
+    location_search = request.GET.get('inv_location')
+    quantity_search = request.GET.get('inv_quantity')
+    # We could build a more dynamic search by appending Q() to our filter
+    # https://stackoverflow.com/questions/55422638/is-there-a-way-to-concatenate-with-q-objects
+    my_filter = Q()
+    if product_sku:
+        my_filter &= Q(product__sku__icontains=product_sku)
+    elif location_search:
+        my_filter &= Q(location__icontains=location_search)
+    elif quantity_search:
+        my_filter &= Q(stock=quantity_search)
     
+    all_inv = Inventory.objects.all() if not my_filter else Inventory.objects.filter(my_filter)
+
+    # Filtering the inventories that need to be restocked 
+    restock_cnt = all_inv.filter(restock=True).count()
+    if request.method == 'GET':
+        inventory_form = InventoryF()
+        # Getting all the notifications to show on Notify Me 
+        user_notification = request.user.notifications.all()
+        notified_inv = [notification.inventory for notification in user_notification]
+        return render(request, gen_temp('inventory_view.html'), {'inventories': all_inv, 'inv_form': inventory_form, 'restock_cnt':restock_cnt, 'user_notications':notified_inv})
+    else:
+        # Handle POST 
+        inventory_form = InventoryF(request.POST)
+        if inventory_form.is_valid():
+            inventory_form.save()
+            messages.success(request, 'Inventory Added Successfully')
+            return redirect('logistics_app:view_inventory')
+        messages.error(request, 'Failed to add Inventory')
+        return render(request, gen_temp('inventory_view.html'), {'inventories': all_inv, 'inv_form': inventory_form, 'restock_cnt':restock_cnt})
+        
+
 @login_required()
 def update_specific_inventory(request, id):
     inv = get_object_or_404(Inventory, id=id)
@@ -190,7 +228,7 @@ def update_specific_inventory(request, id):
         inv_form = InventoryF(instance=inv, data=request.POST)
         if inv_form.is_valid():
             inv_form.save()
-            messages.warning(request, 'Successfully Updated Your Iventory for this Product')
+            messages.warning(request, 'Successfully Updated Your Inventory for this Product')
             return redirect('logistics_app:view_specific_product', sku=inv.product.sku)
         else:
             messages.error(request, 'There was an issue updating your inventory.')
@@ -201,12 +239,45 @@ def update_specific_inventory(request, id):
 @login_required
 def delete_specific_inventory(request, id):
     inv = get_object_or_404(Inventory, id=id)
-    if request.method == 'POST':
+    if request.method == 'GET':
+        return render(request, gen_temp('delete_specific_inventory.html'), context={'inventory': inv})
+    elif request.method == 'POST':
         inv.delete()
         messages.error(request, 'Removed an Inventory.')
-        return redirect('logistics_app:view_specific_product', sku=inv.product.sku)
+        return redirect('logistics_app:view_specific_product', sku=inv.product.sku) if inv.product.sku else redirect('logistics_app:view_products')
     messages.error(request, 'There was some issue in the backend.')
-    return redirect('logistics_app:view_specific_product', sku=inv.product.sku)
+    return redirect('logistics_app:view_specific_product', sku=inv.product.sku) if inv.product.sku else redirect('logistics_app:view_products')
+
+# Inventory Notifications 
+@login_required
+def notify_me(request):
+    if request.method == 'POST':
+        # https://stackoverflow.com/questions/48735726/how-to-get-checkbox-values-in-django-application
+        # Checkbox uses getlist
+        inventory_notification = request.POST.getlist('notifyInv')
+        # Check if the noification already exists with the current user
+        if inventory_notification:
+            for inv_id in inventory_notification:
+                inv_obj = get_object_or_404(Inventory, id=inv_id)
+                if not InventoryNotification.objects.filter(user=request.user, inventory=inv_obj).exists():
+                    # Then we'll add 
+                    newNotification = InventoryNotification.objects.create(inventory=inv_obj, user=request.user)
+                    newNotification.save()
+
+            messages.success(request, f'Registered {len(inventory_notification)} notifications for this inventory.')
+        messages.warning(request, f'Make sure you check "Notify Me" on the inventories you want to recieve notifications for.')
+        return redirect('logistics_app:view_inventory') 
+
+@login_required
+def delete_notify_me(request):
+    # For now we'll remove ALL notifications
+    if request.method == 'POST':
+        user_notifications = request.user.notifications.all()
+        for notifi in user_notifications:
+            notifi.delete()
+
+        messages.warning(request, f'Removed all {len(user_notifications)} notifications for this inventory.')
+        return redirect('logistics_app:view_inventory') 
 
 # CRUD - Orders
 def order_list_view(request):
