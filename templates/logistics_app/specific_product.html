@@ -8,7 +8,47 @@
         <div class="card shadow-sm p-2 rounded border-light" style="background: #e3f2fd;">
             <div class="card-body">
               <h5 class="card-title text-center fw-bold fs-3">Inventories</h5>
-              <p class="card-text">Some Search / Filter Feature Here</p>
+              <div class="container p-2 bg-secondary text-light rounded-top shadow">
+                <form method="GET">
+                    {# Since this is a get request, all these inputs will appear as params in the url #}
+                    <div class="row ">
+                        <div class="col-12 m-auto col-md-11">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-sm" id="locationInput" placeholder="NJ" name="location">
+                                <label for="locationInput" class="text-dark"><i class="bi bi-search"></i> Location</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row text-center">
+                        <div class="col-12 m-auto p-2">
+                            {# Id is different BUT the name will be the same to mnake sure they're one group #}
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="inv_status" id="allStatusID" value="all" checked>
+                                <label class="form-check-label" for="allStatusID">
+                                  All
+                                </label>
+                              </div>
+                              <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="inv_status" id="restockStatusID" value="restock">
+                                <label class="form-check-label" for="restockStatusID">
+                                    Restock
+                                </label>
+                              </div>
+                              <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="inv_status" id="healthyStatusID" value="healthy">
+                                <label class="form-check-label" for="healthyStatusID">
+                                    Healthy
+                                </label>
+                              </div>
+                        </div>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-sm btn-primary">
+                            Find Inventory
+                        </button>
+                    </div>
+                  </form>
+              </div>
             </div>
             <div class="card-body container">
                 <ul class="list-group">
@@ -41,12 +81,14 @@
               <h6 class="card-subtitle mb-2 text-body-secondary">Created: {{ product.date }} </h6>
             </div>
             <div class="card-body container">
+                <p class="text-light fw-semibold">Product Information</p>
                 <ul class="list-group list-group-flush">
-                    <li class="list-group-item list-group-item-info rounded-top"><b>Product SKU: </b>${{ product.sku }}</li>
+                    <li class="list-group-item list-group-item-info rounded-top"><b>Product SKU: </b>{{ product.sku }}</li>
                     <li class="list-group-item list-group-item-info"><b>Category: </b>{{ product.category }}</li>
                     <li class="list-group-item list-group-item-info rounded-bottom"><b>Price: </b>${{ product.price }}</li>
                 </ul>
                 <hr>
+                <p class="text-light fw-semibold">Overall Inventory Information</p>
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item list-group-item-secondary rounded-top"><b>Amount to Restock: </b>{{ amount_to_restock }}</li>
                     <li class="list-group-item list-group-item-secondary"><b>Average Quantity: </b>{{ average_stock }}</li>
