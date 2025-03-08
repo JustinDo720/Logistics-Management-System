@@ -19,7 +19,13 @@ Our [UML](UML%20&%20Sketches/lms_uml.PNG) class diagrams will help us create our
 Our [Flowchart](flowchart_&_usecase/TekBasic_-_Flowchart.jpg) and [User Story](flowchart_&_usecase/tek_basic_LMS_spreadsheet.png) helps us map out the workflow of our logistic management system 
 
 ## Update Logs 
-**03/05**
+**03/07**
+- Work with FOrm Errors (Inventory + Product)
+- Work with Inventory Search
+- LowStock => Email or Message/Toast 
+  - Decrease inventory when an order was made? 
+
+**03/06**
 - [OpenRouteServices](https://openrouteservice.org/) | [Stripe](https://stripe.com/) NO TIME => Django email 
   -  [Getting Directions](https://www.youtube.com/watch?v=xBxWuq8SR6k)
   -  MAYBE [Rout Optimization](https://youtu.be/OOCvhc0k1R4?si=UVgdZ-y9n1AZDisy)

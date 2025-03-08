@@ -43,13 +43,17 @@
                             {% endfor %}
                             </div>
                             {# Handling Error Messages #}
-                            <div class="row row-cols-1 row-cols-md-3">
+                            <div class="row row-cols-1">
                                 {% if prod_form.errors %}
                                     {% for field in prod_form %}
                                         {% for err in field.errors %}
-                                            <p class="text-danger">
-                                                {{ field.label }}: {{ err | safe}}
-                                            </p>
+                                            <div class="alert alert-danger d-flex align-items-center" role="alert">
+                                                <i class="bi bi-exclamation-circle-fill flex-shrink-0 me-2"></i>
+                                                <div>
+                                                    {{ field.label }}: {{ err | safe}}
+                                                </div>
+                                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                            </div>
                                         {% endfor %}
                                     {% endfor %}
                                 {% endif %}

@@ -96,10 +96,27 @@ def view_inventory(request):
 
 @login_required()
 def view_specific_product(request, sku):
+
+    # Search Params:
+    searched_loc = request.GET.get('location', '')
+    searched_invStatus = request.GET.get('inv_status', '')
+
     prod = get_object_or_404(Product, sku=sku)
+    inv = prod.inventories.all().order_by('-restock')
+
+    if searched_loc or searched_invStatus:
+        # Override the inventories with some filters 
+        if searched_invStatus == 'all':
+            inv = prod.inventories.filter(Q(location__icontains=searched_loc)).order_by('-restock')
+        else:
+            # Restock Options 
+            searched_invStatus = True if searched_invStatus == 'restock' else False
+            inv = prod.inventories.filter(Q(location__icontains=searched_loc) & Q(restock=searched_invStatus))
+        
+
     context = {
         'product':prod, 
-        'inventories': prod.inventories.all().order_by('-restock'),
+        'inventories': inv,
     }
 
     # Total Amount of Inventories 
@@ -108,14 +125,21 @@ def view_specific_product(request, sku):
     
     # Average Quantity 
     inventories = context['inventories']
-    context['average_stock'] = sum(inv.stock for inv in inventories) // total
+    try:
+        context['average_stock'] = sum(inv.stock for inv in inventories) // total
+    except ZeroDivisionError as e:
+        context['average_stock'] = 0 
 
     # Needs to restock 
-    inventory_restock = prod.inventories.filter(restock=True).count()
+    inventory_restock = context['inventories'].filter(restock=True).count()
     context['amount_to_restock'] = inventory_restock
 
     # Health Check: below 30% is critial 50% is okay and above 50% is good 
-    health_percentage = ((total-inventory_restock) / total) * 100
+    try:
+        health_percentage = ((total-inventory_restock) / total) * 100
+    except ZeroDivisionError as e:
+        health_percentage = 0
+        
     if health_percentage <= 30:
         context['health_check'] = 'CRITICAL'
     elif health_percentage > 30 and health_percentage <= 50:
@@ -140,9 +164,9 @@ def update_specific_product(request, sku):
             return redirect('logistics_app:view_specific_product', sku=sku)
         else:
             messages.error(request, 'There was an issue updating your product')
-        
+    
         # Handling Form Errors
-        render(request, gen_temp('update_specific_product.html'), {'prod_form':product_form, 'product': prod})
+        return render(request, gen_temp('update_specific_product.html'), {'prod_form':product_form, 'product': prod})
 
 @login_required()
 def delete_specific_product(request, sku):
