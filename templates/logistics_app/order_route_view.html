@@ -1,0 +1,47 @@
+{% extends 'base/search.html' %}
+
+{% block title %}LMS - Order | Drivers {% endblock %}
+
+{% block custom_search %}
+    {% with placeholder='Larchmont NY' name='addr' order_route_search=True %}
+        {{ block.super }}
+    {% endwith %}
+{% endblock %}
+
+{% block main_content %}
+        <div class="container bg-secondary p-4 rounded" style="overflow-y:scroll; max-height:40rem;">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <span class="text-light fw-bolder fs-3">
+                        Route Management
+                    </span>
+                </div>
+            </div>
+            <div class="row">
+                <table class="table table-bordered table-striped table-light mt-2">
+                    <thead class="table-primary">
+                        <tr>
+                            <th scope="col">Delivery Address</th>
+                            <th scope="col">Order ID</th>
+                            <th scope="col">Customer Name</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Priority Level</th>
+                            <th scope="col">View Map</th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-group-divider">
+                        {% for order in orders %}
+                        <tr>
+                            <th scope="row">{{ order.destination_address }}</th>
+                            <th scope="row">{{ order.order_slug }}</th>
+                            <td>{{ order.customer_name }}</td>
+                            <td>{{ order.status }}</td>
+                            <td>{{ order.priority_level }}</td>
+                            <td><a href="{% url 'logistics_app:order_route' order_slug=order.order_slug %}" class="btn btn-outline-primary"><i class="bi bi-map"></i></a></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+{% endblock %}

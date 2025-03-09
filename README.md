@@ -25,15 +25,22 @@ Our [Flowchart](flowchart_&_usecase/TekBasic_-_Flowchart.jpg) and [User Story](f
 - [x] Pre-save logic checks state transition: if restock goes from `False` to `True` we email  
 - [x] Ensure Users are notified if the inventory goes low via email 
   - Since notifications aren't our full focus let's just add a "Remove All Notifcations" Button 
-- [ ] Practice ORS + Folium on Jupyter Notebook first (similarize syntax, api key etc)
-- [ ] When confident, build our your Django 
-- [ ] Working on **Drivers** User story:
+- [x] Practice ORS + Folium on Jupyter Notebook first (similarize syntax, api key etc)
+  - ORS --> Build routes in Long Lat with Profile as Driving Car
+  - Folium --> Map out our route in Lat Long 
+    - Starting Point will be at Tekbasic
+  - Geopy --> Grab Long/Lat Information from Address 
+- [x] When confident, build our your Django 
+  - Once an **Order** is created it will automatically build our Route no?
+- [x] Working on **Drivers** User story:
   - Build shipment tracking page 
+    - Render Folium map as [Embedded HTML](https://youtu.be/KHi58Gf5EJE?si=tBDJ7bTgAFmQtayp&t=341) 
   - Search functionality (Tracking number, pickup/delivery address) (Chain Queries)
-  - View Tracking information (Specific Shipment)
+  - ~~View Tracking information (Specific Shipment)~~ (Work on tomorrow)
   - ^ Included maps for routes + eta
     - **GET** REquest no need to Post/Delete/Put
-- 
+- We may need to work on changing the **Status** level the Drivers could do that 
+- Instead of generate a route automatically (upong save which is bad because address might not always be good) Drivers could do that
 
 **03/07**
 - Work with FOrm Errors (Inventory + Product) (Done)

@@ -10,6 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q  # Searching 
 from .forms import InventoryF, ProductF
 from django.contrib import messages
+import folium
 
 def gen_temp(temp_name):
     return f'logistics_app/{temp_name}' 
@@ -320,3 +321,36 @@ def order_delete_view(request, pk):
         return redirect('/orders/')
     return render(request, 'logistics_app/order_delete.html', {'order': order})
 
+
+# CRUD - Routing 
+def order_route_list(request):
+    search_delivery_address = request.GET.get('addr')
+    search_order_slug = request.GET.get('order_slug')
+
+    # Dynamic Filter 
+    query = Q() 
+    if search_delivery_address:
+        query &= Q(destination_address__icontains=search_delivery_address)
+    elif search_order_slug:
+        query &= Q(order_slug__icontains=search_order_slug)
+    
+    if query:
+        all_orders = Order.objects.filter(query)
+    else:
+        all_orders = Order.objects.all()
+    return render(request, gen_temp('order_route_view.html'), {'orders':all_orders})
+
+def order_route(request, order_slug):
+    my_order = get_object_or_404(Order, order_slug=order_slug)
+    # Here is where we use folium to generate our map as html
+    # We have a class variable for our headquarters but its in: Long/Lat format
+    # For us to use Folium mpa it must be Lat/Long format  
+    if my_order.route_coords:
+        map = folium.Map(location=list(reversed(Order.HEADQUARTERS_COORDS)), zoom_start=14)
+        # We create that Foliumn PolyLine which is based on our "route"
+        # Again we have to reverse EVERY single coord in route_coords 
+        folium.PolyLine(locations=[list(reversed(coord)) for coord in my_order.route_coords], color='blue').add_to(map)
+
+        # Afterwards we must change this map to an html object for us to use on Django Templates 
+        html_map = map._repr_html_()
+        return render(request, gen_temp('specific_order_route.html'), {'map':html_map})

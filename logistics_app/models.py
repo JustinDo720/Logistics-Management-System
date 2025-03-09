@@ -6,6 +6,10 @@ from decimal import Decimal
 from workers.models import LMSWorker
 from django.core.mail import send_mail
 from django.conf import settings
+from geopy.geocoders import Nominatim
+import openrouteservice as ors 
+import time 
+import os
 
 # Create your models here.
 
@@ -21,12 +25,22 @@ class Order(models.Model):
         ('High', 'High')
     ]
 
+    # This is a Long/Lat of Tekbasic's Location
+    HEADQUARTERS_COORDS = [-74.52976762042528, 40.41706977125244]
+
     customer_name = models.CharField(max_length=150)
     order_slug = models.SlugField(null=True, blank=True)
     date = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=50, choices=status_choices, default='Receive')
     priority_level = models.CharField(max_length=30, choices=priority_level_choices, default='Medium')
     destination_address = models.CharField(max_length=300)
+    # Routing (If these class variables don't exist THEN we'll run our route functions)
+    # https://docs.djangoproject.com/en/5.0/topics/db/queries/#querying-jsonfield
+    route_coords = models.JSONField(null=True, blank=True)
+    # We use FloatField because DecimalField would require a max_digit 
+    route_eta = models.FloatField(null=True, blank=True)
+    route_miles = models.FloatField(null=True, blank=True)
+
     # https://stackoverflow.com/questions/12384460/allow-only-positive-decimal-numbers
     total_price = models.DecimalField(max_digits=14, decimal_places=2, blank=True, null=True, validators=[MinValueValidator(Decimal('0.01'))])
 
@@ -48,19 +62,56 @@ class Order(models.Model):
             counter += 1
         return my_slug
     
+    # Building our Routing 
+    # Helper functions to convert 
+    def get_miles(self):
+        return round(self.route_miles/1609, 2)
+
+    def get_eta(self):
+        return time.strftime('%H:%M:%S', time.gmtime(self.route_eta))
+
+    def find_coords(self):
+        # Tekbasic Address (Long Lat) Because of Route
+        head_quarters_coords = Order.HEADQUARTERS_COORDS
+
+        # Building our geolocter 
+        if self.destination_address:
+            geolocator = Nominatim(user_agent="lms_app")
+            loc = geolocator.geocode(self.destination_address)
+            if loc:
+                time.sleep(1)   # Avoid constant request to OpenStreetMap API 
+                # Returning Long Lat because we're using this coord to build our route with ors
+                return [head_quarters_coords,[loc.longitude, loc.latitude]]
+        return None     # Invalid Address or Empty Address
+    
+    def build_route(self, route_profile='driving-car'):
+        coords = self.find_coords()
+        if coords:
+            client = ors.Client(key=os.getenv('ORS_API_KEY'))
+            route = client.directions(
+                coordinates=coords,
+                profile=route_profile,
+                format='geojson'    # Must use geojson format to return our numbered coordinates instead of google coords objects
+            )
+            # Since this is a json field we could put in an array
+            self.route_coords = route['features'][0]['geometry']['coordinates']
+            # We use FloatField because DecimalField would require a max_digit 
+            self.route_eta = route['features'][0]['properties']['summary']['duration']   # Seconds 
+            self.route_miles = route['features'][0]['properties']['summary']['distance'] # Meters 
+            # Event though we set the properties in here we MUST save it to our database (Had an issue where route data wasn't saving)
+            # self.save()   ## We'll save after we build route 
+            return True 
+        return None     # No route because coords doesn't exist 
+        
+    
     # Once saved, we'll generated our order_slug 
     def save(self, *args, **kwargs):
         if not self.order_slug:
             self.order_slug = self.gen_slug() 
 
-        # Maybe we should do signals with the total_price 
-        # if not self.total_price:
-        #     # Query every order_item and sum them 
-        #     amount = 0 
-        #     for item in self.order_items.all():
-        #         price = item.product.price * item.quantity
-        #         amount += price  
-        #     self.total_price = amount 
+        # Generating our route 
+        if not self.route_coords and not self.route_eta and not self.route_miles:
+            self.build_route()
 
         super().save(*args, **kwargs)
 

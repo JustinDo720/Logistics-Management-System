@@ -27,4 +27,8 @@ urlpatterns = [
     path('order/delete/<int:pk>/', views.order_delete_view, name='order_delete'),
 
     # Order Item
+
+    # Drivers Management 
+    path('order/route/list/', views.order_route_list, name='order_route_list'),
+    path('order/route/<slug:order_slug>/', views.order_route, name='order_route'),
 ]

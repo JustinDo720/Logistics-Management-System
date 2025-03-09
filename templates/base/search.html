@@ -14,7 +14,7 @@
                                 {% block custom_search %}
                                     <form  method="GET">
                                         {# Because we're submitting a GET method it'll return us to our view with url params which means no need for csrf #}
-                                        {% if not inventory_search %}
+                                        {% if product_search %}
                                         <div class="input-group input-group-lg shadow-lg">
                                             <input type="text" class="form-control" 
                                                     placeholder="{{ placholder }}" 
@@ -25,7 +25,7 @@
                                                 <i class="bi bi-search"></i>
                                             </button>
                                         </div>
-                                        {% else %}
+                                        {% elif inventory_search %}
                                             {# We need to provide a Quantity and Location field #}
                                             <div class="row">
                                                 <div class="col-12">
@@ -59,6 +59,34 @@
                                                     </button>
                                                 </div>
                                             </div>
+                                        {% elif order_route_search %}
+                                            {# We need to provide a Tracking/OrderSlug + Delivery Address field #}
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <div class="form-floating mb-3">
+                                                        <input type="text" class="form-control shadow-sm" id="{{name}}" placeholder="{{placeholder}}" name="{{ name }}">
+                                                         <label for="{{name}}">Delivery Address</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-12 col-md-6 m-auto">
+                                                    <div class="form-floating mb-3">
+                                                        <input type="text" class="form-control shadow-sm" id="orderSlug" placeholder="TY-408765" name="order_slug">
+                                                        <label for="orderSlug">Order ID</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-12 col-md-2">
+                                                    <input type="reset" class="btn btn-outline-danger">
+                                                </div>
+                                                <div class="col-12 col-md-10 d-grid">
+                                                    <button class="btn btn-outline-success">
+                                                        <i class="bi bi-search"></i> Search
+                                                    </button>
+                                                </div>
+                                            </div>
                                         {% endif %}                                  
                                     </form>
                                 {% endblock %}
@@ -71,8 +99,6 @@
         </div>
     </div>
     <div class="mt-5">
-        <div class="container bg-dark p-4 rounded" style="overflow-y:scroll; max-height:40rem;">
-            {% block main_content %} {% endblock %}
-        </div>
+        {% block main_content %}{% endblock %}
     </div>
 {% endblock %}

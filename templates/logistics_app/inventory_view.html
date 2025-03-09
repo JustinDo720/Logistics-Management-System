@@ -21,176 +21,178 @@
 {# Our Main Content for inventory #}
 
 {% block main_content %}
-<div class="row">
-    <div class="col-12 text-center">
-        <span class="text-light fw-bolder fs-3">
-            Inventory Management
-        </span>
-    </div>
-    <div class="col-12 text-end">
-        <button type='button' class="btn btn-success" data-bs-target="#inventoryCreation" data-bs-toggle="modal">
-            <i class="bi bi-plus-square"></i> Add Inventory
-        </button>
-        <div class="dropdown mt-3">
-            <button class="btn btn-outline-info dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                Manage Notifications
-              </button>
-              <ul class="dropdown-menu">
-                <li>
-                    {# Even though this is outside our form tag we use the form tag id to submit #}
-                    <button type='submit' form="notificationForm" class="dropdown-item">
-                        Update Notifications
+    <div class="container bg-dark p-4 rounded" style="overflow-y:scroll; max-height:40rem;">
+        <div class="row">
+            <div class="col-12 text-center">
+                <span class="text-light fw-bolder fs-3">
+                    Inventory Management
+                </span>
+            </div>
+            <div class="col-12 text-end">
+                <button type='button' class="btn btn-success" data-bs-target="#inventoryCreation" data-bs-toggle="modal">
+                    <i class="bi bi-plus-square"></i> Add Inventory
+                </button>
+                <div class="dropdown mt-3">
+                    <button class="btn btn-outline-info dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Manage Notifications
                     </button>
-                </li>
-                <li><hr class="dropdown-divider"></li>
-                <li>
-                    {# Delete notifications button for modal confirmation #}
-                    <a type="button" class="dropdown-item" data-bs-target="#deleteAllNotifications" data-bs-toggle="modal">
-                        Remove ALL Notifications
-                    </a>
-                </li>
-              </ul>
-            
-        </div>
-    </div>
-</div>
-<form id='notificationForm' method="POST" action="{% url 'logistics_app:notify_me' %}">
-    {% csrf_token %}
-    <table class="table table-bordered table-light mt-2 caption-top">
-        <caption class="text-danger fw-bold">Inventories to Restock: {{ restock_cnt }} </caption>
-        <thead class="table-light">
-        <tr>
-            <th scope="col">Product SKU</th>
-            <th scope="col">Inventory ID#</th>
-            <th scope="col">Location</th>
-            <th scope="col">Quantity</th>
-            <th scope="col">Quantity Threshold</th>
-            <th scope="col">Restock</th>
-            <th scope="col">Actions</th>
-            <th scope="col">Notify Me</th>
-        </tr>
-        </thead>
-        <tbody class="table-group-divider">
-            {% for inv in inventories %}
-                <tr class="{% if inv.restock %}table-danger{% else %}table-success{% endif %}">
-                    <th scope="row">{{ inv.product.sku }}</th> 
-                    <th scope="row">{{ inv.id }}</th> 
-                    <td>{{ inv.location }}</td>
-                    <td>{{ inv.stock }}</td> 
-                    <td>{{ inv.stock_threshold }}</td> 
-                    <td>
-                        {% if inv.restock %}
-                            <b>YES</b>
-                        {% else %}
-                            <b>No</b>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
-                            <a href="{% url 'logistics_app:delete_specific_inventory' id=inv.id %}" class="btn btn-danger">
-                                <i class="bi bi-trash3-fill"></i>
-                            </a>&nbsp;
-                            <a href="{% url 'logistics_app:update_specific_inventory' id=inv.id %}" class="btn btn-warning">
-                                <i class="bi bi-pen"></i>
+                    <ul class="dropdown-menu">
+                        <li>
+                            {# Even though this is outside our form tag we use the form tag id to submit #}
+                            <button type='submit' form="notificationForm" class="dropdown-item">
+                                Update Notifications
+                            </button>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            {# Delete notifications button for modal confirmation #}
+                            <a type="button" class="dropdown-item" data-bs-target="#deleteAllNotifications" data-bs-toggle="modal">
+                                Remove ALL Notifications
                             </a>
-                        </div>
-                    </td>
-                    <td>
-                        {# Notification Button #}
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="{{ inv.id }}" id="notifyInv" name="notifyInv" {% if inv in user_notications %}checked disabled{% endif %}> 
-                        </div>                      
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</form>
-{# Modal for our form #}
-<div class="modal fade" id="inventoryCreation" aria-hidden="true" aria-labelledby="inventoryCreationLabel" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content" style="background: #e3f2fd;">
-        <div class="modal-header">
-            <h1 class="modal-title fs-5" id="inventoryCreationLabel">Create Inventory</h1>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </li>
+                    </ul>
+                    
+                </div>
+            </div>
         </div>
-        <form method="POST" action="{% url 'logistics_app:view_inventory' %}">
-            <div class="modal-body">
-                {% csrf_token %}
-                <p class="fw-semibold text-danger">* fields are required to fill out the form.</p>
-                <p class="fw-semibold text-secondary">{{ inv_form.stock_threshold.help_text }}.</p>
-                <div class="row row-cols-1 row-cols-md-2">
-                    {% for field in inv_form %}
-                    <div class="col m-auto">
-                        {% if not field.name == 'product' %}
-                            <div class="form-floating mb-3 mt-3">
-                                {{ field }}
-                                <label for="{{ field.id }}" class="text-dark">{{ field.label }}</label>
+        <form id='notificationForm' method="POST" action="{% url 'logistics_app:notify_me' %}">
+            {% csrf_token %}
+            <table class="table table-bordered table-light mt-2 caption-top">
+                <caption class="text-danger fw-bold">Inventories to Restock: {{ restock_cnt }} </caption>
+                <thead class="table-light">
+                <tr>
+                    <th scope="col">Product SKU</th>
+                    <th scope="col">Inventory ID#</th>
+                    <th scope="col">Location</th>
+                    <th scope="col">Quantity</th>
+                    <th scope="col">Quantity Threshold</th>
+                    <th scope="col">Restock</th>
+                    <th scope="col">Actions</th>
+                    <th scope="col">Notify Me</th>
+                </tr>
+                </thead>
+                <tbody class="table-group-divider">
+                    {% for inv in inventories %}
+                        <tr class="{% if inv.restock %}table-danger{% else %}table-success{% endif %}">
+                            <th scope="row">{{ inv.product.sku }}</th> 
+                            <th scope="row">{{ inv.id }}</th> 
+                            <td>{{ inv.location }}</td>
+                            <td>{{ inv.stock }}</td> 
+                            <td>{{ inv.stock_threshold }}</td> 
+                            <td>
+                                {% if inv.restock %}
+                                    <b>YES</b>
+                                {% else %}
+                                    <b>No</b>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
+                                    <a href="{% url 'logistics_app:delete_specific_inventory' id=inv.id %}" class="btn btn-danger">
+                                        <i class="bi bi-trash3-fill"></i>
+                                    </a>&nbsp;
+                                    <a href="{% url 'logistics_app:update_specific_inventory' id=inv.id %}" class="btn btn-warning">
+                                        <i class="bi bi-pen"></i>
+                                    </a>
+                                </div>
+                            </td>
+                            <td>
+                                {# Notification Button #}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="{{ inv.id }}" id="notifyInv" name="notifyInv" {% if inv in user_notications %}checked disabled{% endif %}> 
+                                </div>                      
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </form>
+        {# Modal for our form #}
+        <div class="modal fade" id="inventoryCreation" aria-hidden="true" aria-labelledby="inventoryCreationLabel" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content" style="background: #e3f2fd;">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="inventoryCreationLabel">Create Inventory</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="POST" action="{% url 'logistics_app:view_inventory' %}">
+                    <div class="modal-body">
+                        {% csrf_token %}
+                        <p class="fw-semibold text-danger">* fields are required to fill out the form.</p>
+                        <p class="fw-semibold text-secondary">{{ inv_form.stock_threshold.help_text }}.</p>
+                        <div class="row row-cols-1 row-cols-md-2">
+                            {% for field in inv_form %}
+                            <div class="col m-auto">
+                                {% if not field.name == 'product' %}
+                                    <div class="form-floating mb-3 mt-3">
+                                        {{ field }}
+                                        <label for="{{ field.id }}" class="text-dark">{{ field.label }}</label>
+                                    </div>
+                                {% else %}
+                                    <div class="form-floating">
+                                        {{ field }}
+                                        <label for="{{ field.id }}">{{ field.label }}</label>
+                                    </div>
+                                {% endif %}
                             </div>
+                        {% endfor %}
+                        </div>
+                        {# Handling Error Messages #}
+                        <div class="row row-cols-1 row-cols-md-3">
+                            {% if inv_form.errors %}
+                                {% for field in inv_form %}
+                                    {% for err in field.errors %}
+                                        <p class="text-danger">
+                                            {{ field.label }}: {{ err | safe}}
+                                        </p>
+                                    {% endfor %}
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                        <hr>
+                        <div class="text-center">
+                            <button class="btn btn-success" type="submit">
+                                <i class="bi bi-plus-lg"></i> Add Inventory
+                            </button>
+                        </div>    
+                    </div>
+                    <div class="modal-footer">
+                        {% if not inv_form.errors %}
+                            <input type="reset" class="btn btn-sm btn-outline-danger" value="Clear Form">
                         {% else %}
-                            <div class="form-floating">
-                                {{ field }}
-                                <label for="{{ field.id }}">{{ field.label }}</label>
-                            </div>
+                            {# The only way to completely reset a form that has errors is by reloading #}
+                            <a href="{% url 'logistics_app:view_inventory' %}" class="btn btn-sm btn-outline-danger">Completely Reset Form</a>
                         {% endif %}
                     </div>
-                {% endfor %}
+                </form>
                 </div>
-                {# Handling Error Messages #}
-                <div class="row row-cols-1 row-cols-md-3">
-                    {% if inv_form.errors %}
-                        {% for field in inv_form %}
-                            {% for err in field.errors %}
-                                <p class="text-danger">
-                                    {{ field.label }}: {{ err | safe}}
-                                </p>
-                            {% endfor %}
-                        {% endfor %}
-                    {% endif %}
-                </div>
-                <hr>
-                <div class="text-center">
-                    <button class="btn btn-success" type="submit">
-                        <i class="bi bi-plus-lg"></i> Add Inventory
-                    </button>
-                </div>    
             </div>
-            <div class="modal-footer">
-                {% if not inv_form.errors %}
-                    <input type="reset" class="btn btn-sm btn-outline-danger" value="Clear Form">
-                {% else %}
-                    {# The only way to completely reset a form that has errors is by reloading #}
-                    <a href="{% url 'logistics_app:view_inventory' %}" class="btn btn-sm btn-outline-danger">Completely Reset Form</a>
-                {% endif %}
-            </div>
-        </form>
         </div>
-    </div>
-</div>
 
-{# Modal to remove all notifications #}
-<div class="modal fade" id="deleteAllNotifications" tabindex="-1" aria-labelledby="deleteAllNotificationsLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h1 class="modal-title fs-5" id="deleteAllNotificationsLabel">Confirm</h1>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        {# Modal to remove all notifications #}
+        <div class="modal fade" id="deleteAllNotifications" tabindex="-1" aria-labelledby="deleteAllNotificationsLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                <h1 class="modal-title fs-5" id="deleteAllNotificationsLabel">Confirm</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-secondary">
+                        Are you sure you want to remove all <b>notifications</b> from this inventory from <b>{{ inv.product.sku }}</b>?
+                    </p>
+                </div>
+                <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+                <form action="{% url 'logistics_app:delete_notify_me'%}" method="POST">
+                        {% csrf_token %}
+                        <button class="btn btn-sm btn-danger">
+                            Remove Notifications
+                        </button>
+                </form>
+                </div>
+            </div>
+            </div>
         </div>
-        <div class="modal-body">
-            <p class="text-secondary">
-                Are you sure you want to remove all <b>notifications</b> from this inventory from <b>{{ inv.product.sku }}</b>?
-            </p>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
-          <form action="{% url 'logistics_app:delete_notify_me'%}" method="POST">
-                {% csrf_token %}
-                <button class="btn btn-sm btn-danger">
-                    Remove Notifications
-                </button>
-          </form>
-        </div>
-      </div>
     </div>
-  </div>
 {% endblock %}
