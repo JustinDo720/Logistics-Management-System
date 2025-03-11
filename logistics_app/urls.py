@@ -11,6 +11,7 @@ urlpatterns = [
     path('inventory/view/<slug:sku>/', views.view_specific_product, name='view_specific_product'),
     path('inventory/update/<int:id>/', views.update_specific_inventory, name='update_specific_inventory'),
     path('inventory/delete/<int:id>/', views.delete_specific_inventory, name='delete_specific_inventory'),
+
     # Product Management
     path('product/update/<slug:sku>/', views.update_specific_product, name='update_specific_product'),
     path('product/delete/<slug:sku>/', views.delete_specific_product, name='delete_specific_product'),
@@ -21,4 +22,10 @@ urlpatterns = [
     path('orderdetail/<int:pk>/',views.order_detail_view, name='order_detail'),
     path('order/update/<int:pk>/',views.order_update_view, name='order_update'),
     path('order/delete/<int:pk>/', views.order_delete_view, name='order_delete'),
+    path('orderitem/create/', views.order_item_create_view, name='order_item_create'),
+
+    # Report Summary
+    path('reports/', views.report_summary_view, name='report_summary'),
+    path('download/csv', views.download_csv_report_view, name='download_csv_report'),
+
 ]

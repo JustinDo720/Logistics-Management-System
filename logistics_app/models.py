@@ -21,7 +21,7 @@ class Order(models.Model):
     customer_name = models.CharField(max_length=150)
     order_slug = models.SlugField(null=True, blank=True)
     date = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=50, choices=status_choices, default='Receive')
+    status = models.CharField(max_length=50, choices=status_choices, default='Received')
     priority_level = models.CharField(max_length=30, choices=priority_level_choices, default='Medium')
     destination_address = models.CharField(max_length=300)
     # https://stackoverflow.com/questions/12384460/allow-only-positive-decimal-numbers
@@ -105,6 +105,33 @@ class Product(models.Model):
         return self.sku
 
 
+
+
+class Inventory(models.Model):
+    # Instead of one-to-one perhaps we could do one prduct to many inventories 
+    # Still use signals to create a Default Inventory, users could add more 
+    # Think of it as One product could have multiple inventories from different warehouses   
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='inventories')  
+    stock = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    stock_threshold = models.IntegerField(default=50, validators=[MinValueValidator(0)])
+    restock = models.BooleanField(default=True)
+    # Since we're using signals to create, we'll set the location field as optional
+    location = models.CharField(max_length=300, null=True, blank=True)
+    date = models.DateField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Inventory'
+        verbose_name_plural = 'Inventories' 
+
+    # Checking stock
+    def check_inv(self):
+        # Trigger Restock notification (Maybe email works but for now...)
+        self.restock = True if self.stock <= self.stock_threshold else False 
+
+    def __str__(self):
+        return f'{self.product.product_name}: {self.stock} left' if not self.restock else f'{self.product.product_name}: NEEDS RESTOCK! {self.stock}/{self.stock_threshold}'
+
+
 class OrderItem(models.Model):
     # order_item_slug is our Unique Identifier 
     order_item_slug = models.SlugField(null=True, blank=True, unique=True)
@@ -112,6 +139,8 @@ class OrderItem(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='order_items')
     quantity = models.IntegerField(default=1, validators=[MinValueValidator(0)])
     date = models.DateField(auto_now_add=True)
+    
+    inventory = models.ForeignKey(Inventory, on_delete=models.SET_NULL, null=True, blank=True)  # Track inventory location
 
     # Generating an order_id
     @staticmethod
@@ -143,27 +172,3 @@ class OrderItem(models.Model):
     def __str__(self):
         return f"{self.order.customer_name}: {self.order_item_slug}"
     
-
-class Inventory(models.Model):
-    # Instead of one-to-one perhaps we could do one prduct to many inventories 
-    # Still use signals to create a Default Inventory, users could add more 
-    # Think of it as One product could have multiple inventories from different warehouses   
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='inventories')  
-    stock = models.IntegerField(default=0, validators=[MinValueValidator(0)])
-    stock_threshold = models.IntegerField(default=50, validators=[MinValueValidator(0)])
-    restock = models.BooleanField(default=True)
-    # Since we're using signals to create, we'lll set the location field as optional
-    location = models.CharField(max_length=300, null=True, blank=True)
-    date = models.DateField(auto_now_add=True)
-
-    class Meta:
-        verbose_name = 'Inventory'
-        verbose_name_plural = 'Inventories' 
-
-    # Checking stock
-    def check_inv(self):
-        # Trigger Restock notification (Maybe email works but for now...)
-        self.restock = True if self.stock <= self.stock_threshold else False 
-
-    def __str__(self):
-        return f'{self.product.product_name}: {self.stock} left' if not self.restock else f'{self.product.product_name}: NEEDS RESTOCK! {self.stock}/{self.stock_threshold}'

@@ -5,7 +5,7 @@
 {# Block title  to Update our title #}
 
 {% block title %}
-    Order Create 
+    Order Item Create 
 {% endblock %}
 
 {# Content is to modify everything that's within our Body #}
@@ -16,23 +16,10 @@
     <div class="row justify-content-center">
         <div class="col-md-6">
             <form method="post">
-                {% csrf_token %}
-                
-                <h3>Order Details</h3>
-                {{ order_form.as_p }}
-            
-                <h3>Order Items</h3>
-                {{ formset.management_form }}
-                {% for form in formset %}
-                    <div class="order-item">
-                        {{ form.as_p }}
-
-                    </div>
-                {% endfor %}
-            
-                <button class="btn btn-success form-control" type="submit">Submit Order</button>
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button class="btn btn-success form-control" type="submit">Submit</button>
             </form>
-            
             <br>
             <a href="{% url 'logistics_app:order_list' %}" class="btn btn-secondary">Back to List</a>
         </div>
