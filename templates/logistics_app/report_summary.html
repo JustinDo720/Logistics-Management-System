@@ -1,0 +1,85 @@
+{% extends 'base/base.html' %}
+{% block title %}Report Summary{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="text-center">Report Summary</h1>
+
+    <!-- Filter Form -->
+    <form method="GET" class="row g-3 mb-4">
+        <div class="col-md-3">
+            <label>Start Date</label>
+            <input type="date" name="start_date" value="{{ start_date }}" class="form-control">
+        </div>
+        <div class="col-md-3">
+            <label>End Date</label>
+            <input type="date" name="end_date" value="{{ end_date }}" class="form-control">
+        </div>
+        <div class="col-md-3">
+            <label>Status</label>
+            <select name="status" class="form-control">
+                {% for s in statuses %}
+                    <option value="{{ s }}" {% if selected_status == s %}selected{% endif %}>{{ s }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label>Priority Level</label>
+            <select name="priority_level" class="form-control">
+                {% for p in priority_levels %}
+                    <option value="{{ p }}" {% if selected_priority == p %}selected{% endif %}>{{ p }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-12 text-center mt-3">
+            <button type="submit" class="btn btn-primary">Apply Filters</button>
+        </div>
+    </form>
+
+    <!-- Orders Over Time Chart -->
+    <canvas id="orderChart"></canvas>
+
+    <!-- Inventory Stock Levels Chart -->
+    <canvas id="inventoryChart" class="mt-5"></canvas>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Orders Over Time
+        var ctx1 = document.getElementById('orderChart').getContext('2d');
+        var orderChart = new Chart(ctx1, {
+            type: 'line',
+            data: {
+                labels: {{ order_labels|safe }},
+                datasets: [{
+                    label: 'Total Orders',
+                    data: {{ order_data|safe }},
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderWidth: 2
+                }]
+            },
+            options: { responsive: true, scales: { y: { beginAtZero: true } } }
+        });
+
+        // Inventory Stock Levels
+        var ctx2 = document.getElementById('inventoryChart').getContext('2d');
+        var inventoryChart = new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                labels: {{ inventory_labels|safe }},
+                datasets: [{
+                    label: 'Total Stock',
+                    data: {{ inventory_stock|safe }},
+                    backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 2
+                }]
+            },
+            options: { responsive: true, scales: { y: { beginAtZero: true } } }
+        });
+    </script>
+</div>
+<!--passing filtering paramerter with the link-->
+<a href="{% url 'logistics_app:download_csv_report' %}?start_date={{ request.GET.start_date }}&end_date={{ request.GET.end_date }}" class="btn btn-primary">Download CSV</a>
+
+{% endblock %}
