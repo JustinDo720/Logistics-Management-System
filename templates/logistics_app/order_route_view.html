@@ -26,6 +26,7 @@
                             <th scope="col">Customer Name</th>
                             <th scope="col">Status</th>
                             <th scope="col">Priority Level</th>
+                            <th scope="col">Update Status</th>
                             <th scope="col">View Map</th>
                         </tr>
                     </thead>
@@ -37,7 +38,8 @@
                             <td>{{ order.customer_name }}</td>
                             <td>{{ order.status }}</td>
                             <td>{{ order.priority_level }}</td>
-                            <td><a href="{% url 'logistics_app:order_route' order_slug=order.order_slug %}" class="btn btn-outline-primary"><i class="bi bi-map"></i></a></td>
+                            <td class="text-center"><a href="{% url 'logistics_app:update_order_status' order_slug=order.order_slug %}" class="btn btn-outline-warning"><i class="bi bi-pen"></i></a></td>
+                            <td class="text-center"><a href="{% url 'logistics_app:order_route' order_slug=order.order_slug %}" class="btn btn-outline-primary"><i class="bi bi-map"></i></a></td>
                         </tr>
                         {% endfor %}
                     </tbody>

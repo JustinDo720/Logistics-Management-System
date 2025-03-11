@@ -10,6 +10,8 @@ from geopy.geocoders import Nominatim
 import openrouteservice as ors 
 import time 
 import os
+from django.utils import timezone
+from datetime import datetime
 
 # Create your models here.
 
@@ -34,12 +36,7 @@ class Order(models.Model):
     status = models.CharField(max_length=50, choices=status_choices, default='Receive')
     priority_level = models.CharField(max_length=30, choices=priority_level_choices, default='Medium')
     destination_address = models.CharField(max_length=300)
-    # Routing (If these class variables don't exist THEN we'll run our route functions)
-    # https://docs.djangoproject.com/en/5.0/topics/db/queries/#querying-jsonfield
-    route_coords = models.JSONField(null=True, blank=True)
-    # We use FloatField because DecimalField would require a max_digit 
-    route_eta = models.FloatField(null=True, blank=True)
-    route_miles = models.FloatField(null=True, blank=True)
+
 
     # https://stackoverflow.com/questions/12384460/allow-only-positive-decimal-numbers
     total_price = models.DecimalField(max_digits=14, decimal_places=2, blank=True, null=True, validators=[MinValueValidator(Decimal('0.01'))])
@@ -60,8 +57,34 @@ class Order(models.Model):
         while Order.objects.filter(order_slug=my_slug).exists():
             my_slug = f'{slug}-{counter}'
             counter += 1
-        return my_slug
+        return my_slug        
     
+    # Once saved, we'll generated our order_slug 
+    def save(self, *args, **kwargs):
+        if not self.order_slug:
+            self.order_slug = self.gen_slug() 
+
+        # Since we moved our logic to a seperate model, we'll be doing on signals
+        # # Generating our route 
+        # if not self.route_coords and not self.route_eta and not self.route_miles:
+        #     self.build_route()
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.customer_name
+
+# Routing 
+class Route(models.Model):
+    order = models.OneToOneField(Order, on_delete=models.CASCADE)
+    # Routing (If these class variables don't exist THEN we'll run our route functions)
+    # https://docs.djangoproject.com/en/5.0/topics/db/queries/#querying-jsonfield
+    route_coords = models.JSONField(null=True, blank=True)
+    # We use FloatField because DecimalField would require a max_digit 
+    route_eta = models.FloatField(null=True, blank=True)
+    route_miles = models.FloatField(null=True, blank=True)
+    last_updated = models.DateTimeField(null=True, blank=True)
+
     # Building our Routing 
     # Helper functions to convert 
     def get_miles(self):
@@ -75,9 +98,9 @@ class Order(models.Model):
         head_quarters_coords = Order.HEADQUARTERS_COORDS
 
         # Building our geolocter 
-        if self.destination_address:
+        if self.order.destination_address:
             geolocator = Nominatim(user_agent="lms_app")
-            loc = geolocator.geocode(self.destination_address)
+            loc = geolocator.geocode(self.order.destination_address)
             if loc:
                 time.sleep(1)   # Avoid constant request to OpenStreetMap API 
                 # Returning Long Lat because we're using this coord to build our route with ors
@@ -102,21 +125,39 @@ class Order(models.Model):
             # self.save()   ## We'll save after we build route 
             return True 
         return None     # No route because coords doesn't exist 
-        
     
-    # Once saved, we'll generated our order_slug 
+
+    # Any update to this Route we want to make sure we record the date time 
     def save(self, *args, **kwargs):
-        if not self.order_slug:
-            self.order_slug = self.gen_slug() 
-
-        # Generating our route 
-        if not self.route_coords and not self.route_eta and not self.route_miles:
-            self.build_route()
-
+        # datetime.now() to get the current local time instead of timezone.now() 
+        self.last_updated = datetime.now()
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.customer_name
+        return f'{self.order.order_slug} Route'
+
+class OrderStatusHistory(models.Model):
+    status_choices = [
+        ('Received', 'Received'),
+        ('In-Transit', 'In Transit'),
+        ('Delivered', 'Delivered')
+    ]
+
+    class Meta:
+        verbose_name = 'Order Status History'
+        verbose_name_plural = 'Order Status Histories'
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='status_history')
+    status = models.CharField(max_length=50, choices=status_choices, default='Receive')
+    status_msg = models.CharField(max_length=450, null=True, blank=True)
+    last_updated = models.DateTimeField(blank=True, null=True)
+
+    # We'll update the last_updated DateTimeField to use datetime now instead of timezone now
+    def save(self, *args, **kwargs):
+        self.last_updated = datetime.now() 
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f'{self.order.order_slug} {self.status}'
 
 
 class Product(models.Model):

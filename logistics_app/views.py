@@ -1,14 +1,12 @@
 from django.http import JsonResponse
-from django.shortcuts import redirect, render, get_object_or_404
 from .models import Order
-from .forms import RoomUpdateForm, RoomCreateForm
 from django.urls import reverse_lazy
 from django.shortcuts import render, redirect, get_object_or_404
 from workers.models import LMSWorker
-from .models import Product, Inventory, Order, InventoryNotification
+from .models import Product, Inventory, Order, InventoryNotification, Route, OrderStatusHistory
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q  # Searching 
-from .forms import InventoryF, ProductF
+from .forms import InventoryF, ProductF, StatusUpdate, RoomUpdateForm, RoomCreateForm
 from django.contrib import messages
 import folium
 
@@ -323,6 +321,7 @@ def order_delete_view(request, pk):
 
 
 # CRUD - Routing 
+@login_required
 def order_route_list(request):
     search_delivery_address = request.GET.get('addr')
     search_order_slug = request.GET.get('order_slug')
@@ -340,17 +339,45 @@ def order_route_list(request):
         all_orders = Order.objects.all()
     return render(request, gen_temp('order_route_view.html'), {'orders':all_orders})
 
+@login_required
 def order_route(request, order_slug):
     my_order = get_object_or_404(Order, order_slug=order_slug)
-    # Here is where we use folium to generate our map as html
-    # We have a class variable for our headquarters but its in: Long/Lat format
-    # For us to use Folium mpa it must be Lat/Long format  
-    if my_order.route_coords:
-        map = folium.Map(location=list(reversed(Order.HEADQUARTERS_COORDS)), zoom_start=14)
-        # We create that Foliumn PolyLine which is based on our "route"
-        # Again we have to reverse EVERY single coord in route_coords 
-        folium.PolyLine(locations=[list(reversed(coord)) for coord in my_order.route_coords], color='blue').add_to(map)
+    my_route_history = my_order.status_history.all().order_by('-last_updated')
+    if request.method == 'GET':
+        # Here is where we use folium to generate our map as html
+        # We have a class variable for our headquarters but its in: Long/Lat format
+        # For us to use Folium mpa it must be Lat/Long format  
+        # Our order instance is a One-to-One relationship with Route so we could do my_order.route
+        if my_order.route.route_coords:
+            map = folium.Map(location=list(reversed(Order.HEADQUARTERS_COORDS)), zoom_start=14)
+            # We create that Foliumn PolyLine which is based on our "route"
+            # Again we have to reverse EVERY single coord in route_coords 
+            folium.PolyLine(locations=[list(reversed(coord)) for coord in my_order.route.route_coords], color='blue').add_to(map)
 
-        # Afterwards we must change this map to an html object for us to use on Django Templates 
-        html_map = map._repr_html_()
-        return render(request, gen_temp('specific_order_route.html'), {'map':html_map})
+            # Afterwards we must change this map to an html object for us to use on Django Templates 
+            html_map = map._repr_html_()
+            return render(request, gen_temp('specific_order_route.html'), {'map':html_map, 'order':my_order, 'shipping_history': my_route_history})
+    elif request.method == 'POST':
+        # Regenerating the route 
+        my_order.route.build_route()
+        my_order.route.save() 
+        messages.warning(request, 'Attempting to update the route path...')
+        return redirect('logistics_app:order_route', order_slug=order_slug)
+    
+@login_required
+def update_order_status(request, order_slug):
+    # StatusUpdate
+    my_order = get_object_or_404(Order, order_slug=order_slug)
+    if request.method == 'GET':
+        update_form = StatusUpdate(instance=my_order)
+        return render(request, gen_temp('update_order_status.html'), {'update_form':update_form, 'order': my_order})
+    else:
+        update_form = StatusUpdate(instance=my_order, data=request.POST)
+        if update_form.is_valid():
+            update_form.save() 
+            messages.success(request, 'We changed the Status of an Order')
+            return redirect('logistics_app:order_route', order_slug=order_slug) 
+        messages.error(request, 'We failed to change the status of an order.')
+        # Handling form error 
+        return render(request, gen_temp('update_order_status.html'), {'update_form':update_form, 'order': my_order})
+

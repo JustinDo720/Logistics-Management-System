@@ -3,8 +3,90 @@
 {% block title %}LMS - Order | Shipment Details{% endblock %}
 
 {% block content %}
-    <h1>
-        Shipment Details
-    </h1>
-    {{ map | safe}}
+    <div class="row">
+        <div class="col-12 p-4">
+            <h1>
+                Tracking Information: <b>#{{ order.order_slug }}</b>
+            </h1>
+        </div>
+    </div>
+    {# Tracking information #}
+    <div class="row mt-2 mb-5 p-4 fs-5">
+        <div class="col-12 col-md-5">
+            <ul class="list-group list-group-flush shadow">
+                <li class="list-group-item" style="background:#e3f2fd;">
+                    <b>Current Status: </b> {{ order.status }}
+                </li>
+                <li class="list-group-item rounded-top" style="background:#e3f2fd;">
+                    <b>Priority: </b> 
+                    {% if order.priority_level == 'Medium' %}
+                        Standard
+                    {% else %}
+                        High Class
+                    {% endif %}
+                </li>
+                <li class="list-group-item" style="background:#e3f2fd;">
+                    <b>Placed On:</b> {{ order.date }}
+                </li>
+                <li class="list-group-item rounded-bottom" style="background:#e3f2fd;">
+                    <b>Delivery Address:</b> {{ order.destination_address }}
+                </li>
+                <li class="list-group-item list-group-item-secondary">
+                    <b>Total:</b> {% if order.total_price %}${{ order.total_price }}{% else %}N/A{% endif %}
+                </li>
+            </ul>
+        </div>
+    </div>
+    {# Map Display #}
+    <div class="row">
+        <div class="col-12">
+            <div class="card p-4 bg-dark text-light text-center shadow">
+                {# Basic Info #}
+                <h5 class="card-header fs-3 fw-bold text-start">Route Information</h5>
+                <p class="card-text mb-2 fs-4">Estimated Delivery Time: <span class="text-primary">{{ order.route.get_eta }}</span><span class="fs-6"> (HH:MM:SS)</span></p>
+                <p class="card-text mb-2 fs-4">Total Miles: <span class="text-primary">{{ order.route.get_miles }}</span><span class="fs-6"> mi</span></p>
+                <div class="card-body">
+                  <div class="row mb-3">
+                    <form action="{% url 'logistics_app:order_route' order_slug=order.order_slug %}" method="POST">
+                        {% csrf_token %}
+                        <div class="col-12 col-md-6 d-grid m-auto mb-3">
+                                <button class="btn btn-lg btn-primary">Update Map</button>
+                            <span class="text-warning">
+                                Last Updated: <b>{{ order.route.last_updated }}</b>
+                            </span>
+                         
+                        </div>  
+                    </form>
+                  </div>
+                  {# Showing our map #}
+                  <div class="container">
+                    {{ map | safe}}
+                  </div>
+                  {# Tracking Logs #}
+                  <div class="container text-start mt-3">
+                    <h2 class="fw-bold">
+                        Shipment History 
+                    </h2>
+                    {# Scrollable logs #}
+                    <div class="container row">
+                        <div class="col-12 col-md-8">
+                            <ol class="list-group list-group-numbered">
+                                {% for history in shipping_history %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                                        <div class="ms-2 me-auto">
+                                        <div class="fw-bold">{{ history.get_status_display }}</div>
+                                            {{ history.status_msg }}
+                                        </div>
+                                        <span class="badge text-secondary rounded-pill">{{ history.last_updated }}</span>
+                                    </li>
+                                
+                                {% endfor %}
+                            </ol>
+                        </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+        </div>
+    </div>
 {% endblock %}

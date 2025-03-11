@@ -1,0 +1,84 @@
+{% extends 'base/base.html' %}
+
+{% block title %}LMS - Order Status | Update {% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 col-md-1"></div>
+    <div class="col-12 col-md-10">
+        <h3 class="text-center fw-bold mt-3">
+            {% load static %}
+            <img src="{% static 'Logistics_Management_System.png' %}" alt="..." width="55" height="60"> Logistics Management System
+        </h3>
+        <p class="text-center fw-medium text-secondary mb-3">
+            Updating Status For Order <b>"{{ order.order_slug }}"</b>
+        </p>
+        <div class="row">
+            <div class="col-12 col-md-8 m-auto">
+                <span class="border-top border-warning border-5"></span>
+                <div class="card bg-light shadow rounded">
+                    <span class="border-top border-warning border-5"></span>
+                    <div class="card-body p-3">
+                        <h6 class="card-subtitle mb-2 text-body-secondary">
+                            <div class="row">
+                                <div class="col-12 col-md-3 text-end text-warning">
+                                    <i class="bi bi-pencil fs-3"></i>
+                                </div>
+                                <div class="col-12 col-md-8">
+                                    Find the information you want to edit then update it with a new value.
+                                </div>
+                            </div>
+                        </h6>
+                        <form method="POST" action="{% url 'logistics_app:update_order_status' order_slug=order.order_slug %}">
+                            {% csrf_token %}
+                            <p class="fw-semibold text-danger">* fields are required to fill out the form.</p>
+                            <div class="row row-cols-1 row-cols-md-2">
+                                {% for field in update_form %}
+                                <div class="col m-auto">
+                                    <div class="form-floating mb-3 mt-3">
+                                        {{ field }}
+                                        <label for="{{ field.id }}" class="text-dark">{{ field.label }}</label>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                            </div>
+                            {# Handling Error Messages #}
+                            <div class="row row-cols-1">
+                                {% if update_form.errors %}
+                                    {% for field in update_form %}
+                                        {% for err in field.errors %}
+                                            <div class="alert alert-danger d-flex align-items-center" role="alert">
+                                                <i class="bi bi-exclamation-circle-fill flex-shrink-0 me-2"></i>
+                                                <div>
+                                                    {{ field.label }}: {{ err | safe}}
+                                                </div>
+                                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                            </div>
+                                        {% endfor %}
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                            <hr>
+                            <div class="text-center">
+                                <button class="btn btn-warning"><i class="bi bi-pencil-fill"></i> Update Order Status</button>
+                            </div>     
+                        </form>
+                    </div>
+                    <div class="card-footer text-secondary">
+                        <div class="row">
+                            <div class="col-12 col-md-6 text-start">
+                                Changed your mind?
+                            </div> 
+                            <div class="col-12 col-md-6 text-end">
+                                <a href="{% url 'logistics_app:order_route_list' %}" class="btn btn-sm btn-outline-primary">Return</a>
+                            </div> 
+                        </div>
+                    </div>
+                    
+                  </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-1"></div>
+</div>
+{% endblock %}

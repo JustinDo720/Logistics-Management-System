@@ -1,6 +1,6 @@
 # https://www.geeksforgeeks.org/how-to-create-and-use-signals-in-django/
 from django.db.models.signals import post_save, pre_save
-from .models import Product, Inventory, OrderItem, Order
+from .models import Product, Inventory, OrderItem, Order, Route, OrderStatusHistory
 from django.dispatch import receiver
 
 
@@ -74,3 +74,47 @@ def check_inv_stock(sender, instance, **kwargs):
     else:
         print('Not notifying')
         instance.notified = True 
+
+# Once Order is create we need to build ans associated Route 
+def update_history(instance):
+        custom_message = {
+            'Received': 'We have recieved your order, our agents are currectly working on packaging your order.',
+            'In-Transit': 'Finished preparing your order. Our delivery team is currently shipping your product.',
+            'Delivered': 'Great News! We successfully delivered your product. Thank you for working with us.'
+        }
+        history = OrderStatusHistory.objects.create(order=instance, status=instance.status, status_msg=custom_message[instance.status])
+        return history
+
+@receiver(post_save, sender=Order)
+def create_route(sender, instance, created, **kwargs):
+    if created:
+        # Building the 1-1 relationship 
+        my_route = Route.objects.create(order=instance)
+
+        # Use this route to build our coords, calculate distance and eta 
+        my_route.build_route()
+        my_route.save()     # Works because this is a Route object not an Order object so no recursion 
+
+        # Building a "Recieved" History 
+        # We always have a custom message for "Received"
+        history = update_history(instance)
+        history.save()
+
+# Whenever we change Order Status, we'll build a record in 
+# Order Status History
+@receiver(pre_save, sender=Order)
+def create_order_status_history (sender, instance, **kwargs):
+    # Need to check if status was updated 
+    old_order_obj = Order.objects.filter(order_slug = instance.order_slug).first()
+    old_status = old_order_obj.status if old_order_obj else None 
+    print(old_order_obj,old_status)
+    # But honestly think about ti reagrdless of Order Object or not we Coukld still create a new Status Object 
+    # (We'll handle this during created so we could add in "Recieved")
+    # If have an old status and that old status is different from our new one
+    if old_status is not None and old_status != instance.status:    # MAKE SURE we're checking if old_status is not None
+        # We create a status history record 
+        history = update_history(instance)
+        history.save()
+            
+
+        

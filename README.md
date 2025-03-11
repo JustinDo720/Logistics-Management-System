@@ -20,6 +20,14 @@ Our [Flowchart](flowchart_&_usecase/TekBasic_-_Flowchart.jpg) and [User Story](f
 
 ## Update Logs 
 
+**03/10**
+- [x] View Tracking information (Specific Shipment) 
+- [x] Included maps for routes + eta
+- [x] We may need to work on changing the **Status** level the Drivers could do that
+- [x] Instead of generate a route automatically (upong save which is bad because address might not always be good) Drivers could do that
+  - We generate a route automatially but we also let drivers update the map 
+- [x] Added DateTimeField to our Route models to keep track of updates
+
 **03/08**
 - [x] Fix redirect Product Update Delete
 - [x] Pre-save logic checks state transition: if restock goes from `False` to `True` we email  

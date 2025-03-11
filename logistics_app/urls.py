@@ -31,4 +31,5 @@ urlpatterns = [
     # Drivers Management 
     path('order/route/list/', views.order_route_list, name='order_route_list'),
     path('order/route/<slug:order_slug>/', views.order_route, name='order_route'),
+    path('order/route/update/<slug:order_slug>/', views.update_order_status, name='update_order_status'),
 ]
