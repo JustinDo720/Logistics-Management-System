@@ -33,7 +33,7 @@ class Order(models.Model):
     customer_name = models.CharField(max_length=150)
     order_slug = models.SlugField(null=True, blank=True)
     date = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=50, choices=status_choices, default='Receive')
+    status = models.CharField(max_length=50, choices=status_choices, default='Received')
     priority_level = models.CharField(max_length=30, choices=priority_level_choices, default='Medium')
     destination_address = models.CharField(max_length=300)
 
@@ -199,46 +199,6 @@ class Product(models.Model):
     def __str__(self):
         return self.sku
 
-
-class OrderItem(models.Model):
-    # order_item_slug is our Unique Identifier 
-    order_item_slug = models.SlugField(null=True, blank=True, unique=True)
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='order_items')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='order_items')
-    quantity = models.IntegerField(default=1, validators=[MinValueValidator(0)])
-    date = models.DateField(auto_now_add=True)
-
-    # Generating an order_id
-    @staticmethod
-    def gen_id():
-        return randint(1,999999)
-    
-    def gen_order_id(self):
-        # We'll have the customer_name + a generated id + counter 
-        c_name_slug = slugify(self.order.customer_name)
-        generated_id = OrderItem.gen_id()
-        slug = f'{c_name_slug}-{generated_id}' 
-        my_order_id = slug
-
-        counter = 1 
-        while OrderItem.objects.filter(order_item_slug=my_order_id).exists():
-            my_order_id = f'{slug}-{counter}'
-            counter += 1
-        
-        return my_order_id
-
-    def save(self, *args, **kwargs):
-        # If an order_item_slug doesnt exist on .save() function, we'll generate one
-        if not self.order_item_slug:
-            self.order_item_slug = self.gen_order_id()
-
-        # Forward all arguments + keyword arguemnts to carry out the original .save() function 
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return f"{self.order.customer_name}: {self.order_item_slug}"
-    
-
 class Inventory(models.Model):
     # Instead of one-to-one perhaps we could do one prduct to many inventories 
     # Still use signals to create a Default Inventory, users could add more 
@@ -285,6 +245,47 @@ class Inventory(models.Model):
 
     def __str__(self):
         return f'{self.product.product_name}: {self.stock} left' if not self.restock else f'{self.product.product_name}: NEEDS RESTOCK! {self.stock}/{self.stock_threshold}'
+
+class OrderItem(models.Model):
+    # order_item_slug is our Unique Identifier 
+    order_item_slug = models.SlugField(null=True, blank=True, unique=True)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='order_items')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='order_items')
+    quantity = models.IntegerField(default=1, validators=[MinValueValidator(0)])
+    date = models.DateField(auto_now_add=True)
+    
+    inventory = models.ForeignKey(Inventory, on_delete=models.SET_NULL, null=True, blank=True, related_name='order_items')  # Track inventory location
+
+    # Generating an order_id
+    @staticmethod
+    def gen_id():
+        return randint(1,999999)
+    
+    def gen_order_id(self):
+        # We'll have the customer_name + a generated id + counter 
+        c_name_slug = slugify(self.order.customer_name)
+        generated_id = OrderItem.gen_id()
+        slug = f'{c_name_slug}-{generated_id}' 
+        my_order_id = slug
+
+        counter = 1 
+        while OrderItem.objects.filter(order_item_slug=my_order_id).exists():
+            my_order_id = f'{slug}-{counter}'
+            counter += 1
+        
+        return my_order_id
+
+    def save(self, *args, **kwargs):
+        # If an order_item_slug doesnt exist on .save() function, we'll generate one
+        if not self.order_item_slug:
+            self.order_item_slug = self.gen_order_id()
+
+        # Forward all arguments + keyword arguemnts to carry out the original .save() function 
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.order.customer_name}: {self.order_item_slug}"
+    
 
 class InventoryNotification(models.Model):
     # Inventory will have access Users who want to stay updated with that inventory 

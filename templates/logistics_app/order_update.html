@@ -1,30 +1,34 @@
-{#  Make sure we extend from base/base.html everytime (templates/base/base.html) #}
 {% extends 'base/base.html' %}
 
-{# Block title  to Update our title #}
-
 {% block title %}
-    Order Update 
+    Update Order
 {% endblock %}
 
-{# Content is to modify everything that's within our Body #}
 {% block content %}
-
-<h1 class="text-center">Update the order</h1>
+<h1 class="text-center">Update Order</h1>
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-6">
-
             <form method="post">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <button class="btn btn-success form-control" type="submit">Update</button>
+                {% csrf_token %}
+                
+                <h3>Order Details</h3>
+                {{ order_form.as_p }}
+            
+                <h3>Order Items</h3>
+                {{ formset.management_form }}
+                {% for form in formset %}
+                    <div class="order-item">
+                        {{ form.as_p }}
+                    </div>
+                {% endfor %}
+                
+                <button class="btn btn-success form-control" type="submit">Submit Order</button>
             </form>
-    
+
             <br>
-            <a class="btn btn-secondary" href="{% url 'logistics_app:order_list' %}">Back to List</a>
+            <a href="{% url 'logistics_app:order_list' %}" class="btn btn-secondary">Back to List</a>
         </div>
     </div>
 </div>
-
 {% endblock %}

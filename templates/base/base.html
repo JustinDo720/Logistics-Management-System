@@ -74,12 +74,12 @@
                         </a>
                         {% if user.is_superuser %}
                             <li class="nav-item">
-                                <a href="#" class="nav-link py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Home">
+                                <a href="{% url 'logistics_app:order_list' %}" class="nav-link py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Home">
                                     <i class="bi-bag-check fs-5"></i> Orders
                                 </a>
                             </li>
                             <li>
-                                <a href="#" class="nav-link py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Orders">
+                                <a href="{% url 'logistics_app:report_summary' %}" class="nav-link py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Orders">
                                     <i class="bi-clipboard-data fs-5"></i> Reports
                                 </a>
                             </li>
@@ -102,12 +102,12 @@
                             {% if user.role == 'lm' %}
                                 {# Only enabling Orders & Reports #}
                                 <li class="nav-item">
-                                    <a href="#" class="nav-link py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Home">
+                                    <a href="{% url 'logistics_app:order_list' %}" class="nav-link py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Home">
                                         <i class="bi-bag-check fs-5"></i> Orders
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="#" class="nav-link py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Orders">
+                                    <a href="{% url 'logistics_app:report_summary' %}" class="nav-link py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Orders">
                                         <i class="bi-clipboard-data fs-5"></i> Reports
                                     </a>
                                 </li>
