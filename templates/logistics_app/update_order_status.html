@@ -1,6 +1,6 @@
 {% extends 'base/base.html' %}
 
-{% block title %}LMS - Product | Update {% endblock %}
+{% block title %}LMS - Order Status | Update {% endblock %}
 
 {% block content %}
 <div class="row">
@@ -11,7 +11,7 @@
             <img src="{% static 'Logistics_Management_System.png' %}" alt="..." width="55" height="60"> Logistics Management System
         </h3>
         <p class="text-center fw-medium text-secondary mb-3">
-            Updating <b>"{{ product.sku }}"</b>
+            Updating Status For Order <b>"{{ order.order_slug }}"</b>
         </p>
         <div class="row">
             <div class="col-12 col-md-8 m-auto">
@@ -29,11 +29,11 @@
                                 </div>
                             </div>
                         </h6>
-                        <form method="POST" action="{% url 'logistics_app:update_specific_product' sku=product.sku%}">
+                        <form method="POST" action="{% url 'logistics_app:update_order_status' order_slug=order.order_slug %}">
                             {% csrf_token %}
                             <p class="fw-semibold text-danger">* fields are required to fill out the form.</p>
                             <div class="row row-cols-1 row-cols-md-2">
-                                {% for field in prod_form %}
+                                {% for field in update_form %}
                                 <div class="col m-auto">
                                     <div class="form-floating mb-3 mt-3">
                                         {{ field }}
@@ -44,8 +44,8 @@
                             </div>
                             {# Handling Error Messages #}
                             <div class="row row-cols-1">
-                                {% if prod_form.errors %}
-                                    {% for field in prod_form %}
+                                {% if update_form.errors %}
+                                    {% for field in update_form %}
                                         {% for err in field.errors %}
                                             <div class="alert alert-danger d-flex align-items-center" role="alert">
                                                 <i class="bi bi-exclamation-circle-fill flex-shrink-0 me-2"></i>
@@ -60,7 +60,7 @@
                             </div>
                             <hr>
                             <div class="text-center">
-                                <button class="btn btn-warning"><i class="bi bi-pencil-fill"></i> Update Product</button>
+                                <button class="btn btn-warning"><i class="bi bi-pencil-fill"></i> Update Order Status</button>
                             </div>     
                         </form>
                     </div>
@@ -70,7 +70,7 @@
                                 Changed your mind?
                             </div> 
                             <div class="col-12 col-md-6 text-end">
-                                <a href="{% url 'logistics_app:view_products' %}" class="btn btn-sm btn-outline-primary">Return</a>
+                                <a href="{% url 'logistics_app:order_route_list' %}" class="btn btn-sm btn-outline-primary">Return</a>
                             </div> 
                         </div>
                     </div>

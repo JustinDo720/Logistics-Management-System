@@ -8,6 +8,9 @@ models_to_register = [
     models.OrderItem,
     models.Product,
     models.Inventory,
+    models.InventoryNotification,
+    models.Route,
+    models.OrderStatusHistory
 ]
 
 for model in models_to_register:

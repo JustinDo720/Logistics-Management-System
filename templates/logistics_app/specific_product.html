@@ -8,7 +8,7 @@
         <div class="card shadow-sm p-2 rounded border-light" style="background: #e3f2fd;">
             <div class="card-body">
               <h5 class="card-title text-center fw-bold fs-3">Inventories</h5>
-              <div class="container p-2 bg-secondary text-light rounded-top shadow">
+              <div class="container p-4 bg-dark text-light rounded-top shadow">
                 <form method="GET">
                     {# Since this is a get request, all these inputs will appear as params in the url #}
                     <div class="row ">
@@ -59,6 +59,8 @@
                             href="{% url 'logistics_app:update_specific_inventory' id=inv.id%}">
                             <div class="ms-2 me-auto">
                             <div class="fw-bolder">{% if inv.location %}{{ inv.location }}{% else %} Not Specified {% endif %}</div>
+                                Inventory ID: <b>#{{ inv.id }}</b>
+                                <br>
                                 Status: {% if inv.restock %}Needs Restock!{% else %}Healthy {% endif %}
                                 <br>
                                 Threshold: {{ inv.stock_threshold }}

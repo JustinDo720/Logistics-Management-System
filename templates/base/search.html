@@ -8,13 +8,14 @@
                 <div class="row">
                     <div class="card p-2 rounded-start border-3" style="background: #e3f2fd;">
                         <div class="card-body">
-                            <h3 class="card-title text-center fw-bolder">Logistics Management System</h3>
+                            <h3 class="card-title text-center fw-bolder">Logistics Management Search System</h3>
                             <div class="col-12 col-md-8 m-auto mt-4 mb-4">
                                 {# Customizing Form based on Child template: https://stackoverflow.com/questions/36963802/is-there-a-way-to-pass-a-variable-to-an-extended-template-in-django #}
                                 {% block custom_search %}
-                                    <form class="shadow-lg" method="GET">
+                                    <form  method="GET">
                                         {# Because we're submitting a GET method it'll return us to our view with url params which means no need for csrf #}
-                                        <div class="input-group input-group-lg">
+                                        {% if product_search %}
+                                        <div class="input-group input-group-lg shadow-lg">
                                             <input type="text" class="form-control" 
                                                     placeholder="{{ placholder }}" 
                                                     aria-label="searching" 
@@ -23,7 +24,70 @@
                                             <button class="btn btn-outline-success">
                                                 <i class="bi bi-search"></i>
                                             </button>
-                                        </div>                                  
+                                        </div>
+                                        {% elif inventory_search %}
+                                            {# We need to provide a Quantity and Location field #}
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <div class="form-floating mb-3">
+                                                        <input type="text" class="form-control shadow-sm" id="product_sku" placeholder="web-development-services-bottle-96978" name="{{ name }}">
+                                                         <label for="product_sku">Product SKU</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-12 col-md-8">
+                                                    <div class="form-floating mb-3">
+                                                        <input type="text" class="form-control shadow-sm" id="inv_location" placeholder="NJ" name="inv_location">
+                                                        <label for="inv_location">Location</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12 col-md-4">
+                                                    <div class="form-floating mb-3">
+                                                        <input type="number" class="form-control shadow-sm" id="inv_quantity" placeholder="10" name="inv_quantity">
+                                                        <label for="inv_quantity">Quantity</label>
+                                                    </div>
+                                                </div>  
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-12 col-md-2">
+                                                    <input type="reset" class="btn btn-outline-danger">
+                                                </div>
+                                                <div class="col-12 col-md-10 d-grid">
+                                                    <button class="btn btn-outline-success">
+                                                        <i class="bi bi-search"></i> Search
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        {% elif order_route_search %}
+                                            {# We need to provide a Tracking/OrderSlug + Delivery Address field #}
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <div class="form-floating mb-3">
+                                                        <input type="text" class="form-control shadow-sm" id="{{name}}" placeholder="{{placeholder}}" name="{{ name }}">
+                                                         <label for="{{name}}">Delivery Address</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-12 col-md-6 m-auto">
+                                                    <div class="form-floating mb-3">
+                                                        <input type="text" class="form-control shadow-sm" id="orderSlug" placeholder="TY-408765" name="order_slug">
+                                                        <label for="orderSlug">Order ID</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-12 col-md-2">
+                                                    <input type="reset" class="btn btn-outline-danger">
+                                                </div>
+                                                <div class="col-12 col-md-10 d-grid">
+                                                    <button class="btn btn-outline-success">
+                                                        <i class="bi bi-search"></i> Search
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        {% endif %}                                  
                                     </form>
                                 {% endblock %}
                             </div>
@@ -35,8 +99,6 @@
         </div>
     </div>
     <div class="mt-5">
-        <div class="container bg-dark p-4 rounded" style="overflow-y:scroll; max-height:40rem;">
-            {% block main_content %} {% endblock %}
-        </div>
+        {% block main_content %}{% endblock %}
     </div>
 {% endblock %}

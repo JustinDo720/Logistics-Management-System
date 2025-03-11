@@ -121,3 +121,15 @@ class ProductF(forms.ModelForm):
             'price': forms.NumberInput(attrs={'class':'form-control form-control-sm', 'placeholder': 5, 'id': 'priceField'})
         }
        
+# Updating Route 
+class StatusUpdate(forms.ModelForm):
+    class Meta:
+        model=Order
+        fields= [
+            'status',
+            'priority_level'
+        ]
+        widgets={
+            'status': forms.Select(attrs={'class': 'form-select', 'id': 'statusSelect', 'aria-label': 'Floating Label status select'}),
+            'priority_level': forms.Select(attrs={'class': 'form-select', 'id': 'prioritySelect', 'aria-label': 'Floating Label priority select'})
+        }

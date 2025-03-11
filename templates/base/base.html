@@ -79,18 +79,23 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="#" class="nav-link py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Orders">
+                                <a href="{% url 'logistics_app:report_summary' %}" class="nav-link py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Orders">
                                     <i class="bi-clipboard-data fs-5"></i> Reports
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="#" class="nav-link py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Home">
+                                <a href="{% url 'logistics_app:order_route_list' %}" class="nav-link py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Home">
                                     <i class="bi-truck fs-5"></i> Route
                                 </a>
                             </li>
                             <li>
                                 <a href="{% url 'logistics_app:view_inventory'%}" class="nav-link py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Dashboard">
                                     <i class="bi-box fs-5"></i> Inventory
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{% url 'logistics_app:view_products'%}" class="nav-link py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Dashboard">
+                                    <i class="bi bi-boxes"></i> Product
                                 </a>
                             </li>
                         {% else %}
@@ -107,19 +112,24 @@
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a href="#" class="nav-link disabled py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Home">
+                                    <a href="{% url 'logistics_app:order_route_list' %}" class="nav-link disabled py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Home">
                                         <i class="bi-truck fs-5"></i> Route
                                     </a>
                                 </li>
                                 <li>
                                     <a href="{% url 'logistics_app:view_inventory'%}" class="nav-link disabled py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Dashboard">
                                         <i class="bi-box fs-5"></i> Inventory
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'logistics_app:view_products'%}" class="nav-link disabled py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Dashboard">
+                                        <i class="bi bi-boxes"></i> Product
                                     </a>
                                 </li>
                             {% elif user.role == 'drivers' %}
                                 {# Only enabling Routes #}
                                 <li class="nav-item">
-                                    <a href="#" class="nav-link py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Home">
+                                    <a href="{% url 'logistics_app:order_route_list' %}" class="nav-link py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Home">
                                         <i class="bi-truck fs-5"></i> Route
                                     </a>
                                 </li>
@@ -138,11 +148,21 @@
                                         <i class="bi-box fs-5"></i> Inventory
                                     </a>
                                 </li>
+                                <li>
+                                    <a href="{% url 'logistics_app:view_products'%}" class="nav-link disabled py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Dashboard">
+                                        <i class="bi bi-boxes"></i> Product
+                                    </a>
+                                </li>
                             {% elif user.role == 'ws' %}
-                                {# Only enabling Inventory #}
+                                {# Only enabling Inventory & Products #}
                                 <li>
                                     <a href="{% url 'logistics_app:view_inventory'%}" class="nav-link py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Dashboard">
                                         <i class="bi-box fs-5"></i> Inventory
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'logistics_app:view_products'%}" class="nav-link py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Dashboard">
+                                        <i class="bi bi-boxes"></i> Product
                                     </a>
                                 </li>
                                 <li class="nav-item">
@@ -156,7 +176,7 @@
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a href="#" class="nav-link disabled py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Home">
+                                    <a href="{% url 'logistics_app:order_route_list' %}" class="nav-link disabled py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Home">
                                         <i class="bi-truck fs-5"></i> Route
                                     </a>
                                 </li>

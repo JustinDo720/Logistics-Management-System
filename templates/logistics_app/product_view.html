@@ -1,0 +1,227 @@
+{% extends 'base/search.html' %}
+
+{# Already Extended From Base #}
+{% block title %}LMS - Product {% endblock %}
+
+{% comment %}
+    Custom form block we have 3 arguments: post_url, placeholder and name
+
+    post_url is actually supplied by our context 
+    
+    In our parent template, we use these arguments as variables and in this child template with supply those arguments using 
+    {% with %}
+
+    We run the block.super to run everything in my parent templalte 
+
+{% endcomment %}
+{% block custom_search %}
+    {% with placholder="Search SKU..." name='product_sku' product_search=True%}
+        {{ block.super }}
+    {% endwith %}
+{% endblock %}
+
+{# Our Main Content for inventory #}
+
+{% block main_content %}
+    <div class="container bg-dark p-4 rounded" style="overflow-y:scroll; max-height:40rem;">
+        <div class="row">
+            <div class="col-12 text-center">
+                <span class="text-light fw-bolder fs-3">
+                    Product and Inventory Management
+                </span>
+            </div>
+            <div class="col-12 text-end">
+                <button type='button' class="btn btn-success" data-bs-target="#productCreation" data-bs-toggle="modal">
+                    <i class="bi bi-plus-square"></i> Add Product/Inventory
+                </button>
+            </div>
+        </div>
+        <table class="table table-bordered table-light table-striped mt-2">
+            <caption class="text-light fw-bold">Product and Inventory Management</caption>
+            <thead class="table-light">
+            <tr>
+                <th scope="col">Product SKU</th>
+                <th scope="col">Name</th>
+                <th scope="col">Category</th>
+                <th scope="col">Price ($)</th>
+                <th scope="col">Actions</th>
+            </tr>
+            </thead>
+            <tbody class="table-group-divider">
+                {% for prod_i in prod_info %}
+                    {# Main Product Details #}
+                    <tr class="table-light">
+                        <th scope="row">{{ prod_i.product.sku }}</th>
+                        <td>{{ prod_i.product.product_name }}</td>
+                        <td>{{ prod_i.product.category }}</td>
+                        <td>{{ prod_i.product.price }}</td>
+                        <td>
+                            <div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
+                                <a href="{% url 'logistics_app:delete_specific_product' sku=prod_i.product.sku%}" class="btn btn-outline-danger">
+                                    <i class="bi bi-trash3-fill"></i>
+                                </a>
+                                <a href="{% url 'logistics_app:view_specific_product' sku=prod_i.product.sku%}" class="btn btn-outline-primary">
+                                    <i class="bi bi-card-text"></i>
+                                </a>
+                                <a href="{% url 'logistics_app:update_specific_product' sku=prod_i.product.sku%}" class="btn btn-outline-warning">
+                                    <i class="bi bi-pen"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {# Nested Table for Inventories associated WITH that product#}
+                    <tr>
+                        <td colspan="5">
+                        <table class="table mb-0 table-sm bg-light">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Inventory ID</th>
+                                    <th scope="col">Inventory Location</th>
+                                    <th scope="col">Quantity</th>
+                                    <th scope="col">Restock</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {# Inventory Details #}
+                                {% for inv in prod_i.inventories %}
+                                    <tr class="{% if inv.restock %}table-danger{% else %}table-success{% endif %}">
+                                        <th scope="row">
+                                            #{{ inv.id }} 
+                                        </th>
+                                        <th scope="row">
+                                            {% if inv.location %}
+                                                {{ inv.location }}
+                                            {% else %}
+                                                N/A
+                                            {% endif %}      
+                                        </th>
+                                        <td>{{ inv.stock }}</td>
+                                        <td>
+                                            {% if inv.restock %}
+                                                <b>YES</b>
+                                            {% else %}
+                                                <b>No</b>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        </td>
+                    </tr>
+                
+                {% endfor %}
+            </tbody>
+        </table>
+        {# Modal for our forms #}
+        <div class="modal fade" id="productCreation" aria-hidden="true" aria-labelledby="productCreationLabel" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content bg-dark text-light">
+                <div class="modal-header">
+                <h1 class="modal-title fs-5 fw-bold" id="productCreationLabel">Create Product</h1>
+                <button type="button" class="btn-close bg-light" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="POST" action="{% url 'logistics_app:view_products' %}">
+                    <div class="modal-body">
+                        {% csrf_token %}
+                        <p class="fw-semibold text-danger">* fields are required to fill out the form.</p>
+                        <div class="row row-cols-1 row-cols-md-2">
+                            {% for field in prod_form %}
+                            <div class="col m-auto">
+                                <div class="form-floating mb-3 mt-3">
+                                    {{ field }}
+                                    <label for="{{ field.id }}" class="text-dark">{{ field.label }}</label>
+                                </div>
+                            </div>
+                        {% endfor %}
+                        </div>
+                        {# Handling Error Messages #}
+                        <div class="row row-cols-1 row-cols-md-3">
+                            {% if prod_form.errors %}
+                                {% for field in prod_form %}
+                                    {% for err in field.errors %}
+                                        <p class="text-danger">
+                                            {{ field.label }}: {{ err | safe}}
+                                        </p>
+                                    {% endfor %}
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                        <hr>
+                        <div class="text-center">
+                            <button class="btn btn-success"><i class="bi bi-plus-lg"></i> Add Product</button>
+                        </div>     
+                    </div>
+                    <div class="modal-footer">
+                        {% if not prod_form.errors %}
+                            <input type="reset" class="btn btn-sm btn-outline-danger" value="Clear Form">
+                        {% else %}
+                            <a href="{% url 'logistics_app:view_products' %}" class="btn btn-sm btn-outline-danger">Completely Reset Form</a>
+                        {% endif %}
+                    <button class="btn btn-sm btn-outline-primary" data-bs-target="#inventoryCreation" data-bs-toggle="modal">Create Inventory</button>
+                    </div>
+                </form>
+            </div>
+            </div>
+        </div>
+        <div class="modal fade" id="inventoryCreation" aria-hidden="true" aria-labelledby="inventoryCreationLabel" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content" style="background: #e3f2fd;">
+                <div class="modal-header">
+                <h1 class="modal-title fs-5" id="inventoryCreationLabel">Create Inventory</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="POST" action="{% url 'logistics_app:view_products' %}">
+                    <div class="modal-body">
+                        {% csrf_token %}
+                        <p class="fw-semibold text-danger">* fields are required to fill out the form.</p>
+                        <p class="fw-semibold text-secondary">{{ inv_form.stock_threshold.help_text }}.</p>
+                        <div class="row row-cols-1 row-cols-md-2">
+                            {% for field in inv_form %}
+                            <div class="col m-auto">
+                                {% if not field.name == 'product' %}
+                                    <div class="form-floating mb-3 mt-3">
+                                        {{ field }}
+                                        <label for="{{ field.id }}" class="text-dark">{{ field.label }}</label>
+                                    </div>
+                                {% else %}
+                                    <div class="form-floating">
+                                        {{ field }}
+                                        <label for="{{ field.id }}">{{ field.label }}</label>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                        </div>
+                        {# Handling Error Messages #}
+                        <div class="row row-cols-1 row-cols-md-3">
+                            {% if inv_form.errors %}
+                                {% for field in inv_form %}
+                                    {% for err in field.errors %}
+                                        <p class="text-danger">
+                                            {{ field.label }}: {{ err | safe}}
+                                        </p>
+                                    {% endfor %}
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                        <hr>
+                        <div class="text-center">
+                            <button class="btn btn-success"><i class="bi bi-plus-lg"></i> Add Inventory</button>
+                        </div>    
+                    </div>
+                    <div class="modal-footer">
+                        {% if not inv_form.errors %}
+                            <input type="reset" class="btn btn-sm btn-outline-danger" value="Clear Form">
+                        {% else %}
+                            {# The only way to completely reset a form that has errors is by reloading #}
+                            <a href="{% url 'logistics_app:view_products' %}" class="btn btn-sm btn-outline-danger">Completely Reset Form</a>
+                        {% endif %}
+                        <button class="btn btn-sm btn-outline-primary" data-bs-target="#productCreation" data-bs-toggle="modal">Create Product</button>
+                    </div>
+                </form>
+            </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

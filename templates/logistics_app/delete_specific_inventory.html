@@ -1,6 +1,6 @@
 {% extends 'base/base.html' %}
 
-{% block title %}LMS - Product | Remove {% endblock %}
+{% block title %}LMS - Inventory | Remove {% endblock %}
 
 {% block content %}
 <div class="row">
@@ -11,7 +11,7 @@
             <img src="{% static 'Logistics_Management_System.png' %}" alt="..." width="55" height="60"> Logistics Management System
         </h3>
         <p class="text-center fw-medium text-secondary mb-3">
-            Removing <b>"{{ product.sku }}"</b>
+            Removing Inventory From: <b>"{{ inventory.product.sku }}"</b>
         </p>
         <div class="row">
             <div class="col-12 col-md-8 m-auto">
@@ -25,13 +25,13 @@
                                     <i class="bi bi-trash fs-3"></i>
                                 </div>
                                 <div class="col-12 col-md-8">
-                                    Confirm with us to remove this product.
+                                    Confirm with us to remove this inventory.
                                 </div>
                             </div>
                         </h6>
-                        <form method="POST" action="{% url 'logistics_app:delete_specific_product' sku=product.sku%}">
+                        <form method="POST" action="{% url 'logistics_app:delete_specific_inventory' id=inventory.id %}">
                             {% csrf_token %}
-                                <p class="fw-semibold">Are you sure you want to remove <b>"{{ product.product_name }}"</b> along with all the associated <b>inventories.</b></p>
+                                <p class="fw-semibold">Are you sure you want to remove this inventory from <b>"{{ inventory.location }}"</b> from the associated product: <b>{{ inventory.product.product_name }}.</b></p>
                             
                             <hr>
                             <div class="text-center">
@@ -45,7 +45,7 @@
                                 Changed your mind?
                             </div> 
                             <div class="col-12 col-md-6 text-end">
-                                <a href="{% url 'logistics_app:view_products' %}" class="btn btn-sm btn-outline-primary">Return</a>
+                                <a href="{% url 'logistics_app:view_inventory' %}" class="btn btn-sm btn-outline-primary">Return</a>
                             </div> 
                         </div>
                     </div>
