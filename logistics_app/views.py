@@ -13,16 +13,13 @@ from django.db.models.functions import TruncMonth
 from django.db.models import Count, Sum
 import csv
 from django.http import HttpResponse
-<<<<<<< HEAD
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.conf import settings
 import stripe
 import json
-=======
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
->>>>>>> origin/master
 
 def gen_temp(temp_name):
     return f'logistics_app/{temp_name}' 
