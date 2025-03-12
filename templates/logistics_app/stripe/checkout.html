@@ -25,18 +25,40 @@
     <div class="col-12 col-md-6">
         <div class="row">
             {# Card Information #}
-            <div class="card border-light bg-primary text-light shadow-sm">
+            <div class="card border-light {% if user.card == 'visa' %} bg-primary {% elif user.card == 'mc' %} bg-dark {% endif %} text-light shadow-sm"
+                 {% if user.card == 'ae' %}style="background: #D4AF37;"{% endif %}>
                 <div class="card-body">
-                <h5 class="card-title fw-bolder fs-3">Visa</h5>
+                <h5 class="card-title fw-bolder fs-3">
+                    {{ user.get_card_display }}
+                </h5>
                 <p class="text-center fw-semibold fs-4 p-3">
-                    4242 4242 4242 4242
+                    {% if user.card == 'visa' %}
+                        4000 0566 5566 5556
+                    {% elif user.card == 'mc' %}
+                        5200 8282 8282 8210
+                    {% elif user.card == 'ae' %}
+                        3782 822463 10005
+                    {% endif %}
+                    
                 </p>
                 <div class="row text-center">
                     <div class="col-12 col-md-6">
-                        Good Thru: 05/27
+                        {% if user.card == 'visa' %}
+                            Good Thru: 03/27
+                        {% elif user.card == 'mc' %}
+                            Good Thru: 05/26
+                        {% elif user.card == 'ae' %}
+                            Good Thru: 07/27
+                        {% endif %}
                     </div>
                     <div class="col-12 col-md-6">
-                        CVC: 598
+                        {% if user.card == 'visa' %}
+                            CVC: 598
+                        {% elif user.card == 'mc' %}
+                            CVC: 653
+                        {% elif user.card == 'ae' %}
+                            CVC: 3821
+                        {% endif %}
                     </div>
                 </div>
                 <div class="row mt-3">

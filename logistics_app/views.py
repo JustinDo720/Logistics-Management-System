@@ -23,8 +23,33 @@ def gen_temp(temp_name):
     return f'logistics_app/{temp_name}' 
 
 # Create your views here.
+@login_required
 def home_page(request):
-    return render(request, gen_temp('home.html'))
+    """
+        Here's what we need to display on the main dashboard:
+            - Total # of Orders
+            - ACTIVE shipments (not delivered)
+            - # Inventories that need to be restock
+            - 10 Recent Orders (ordered by date)
+            - 10 recent Route History 
+    """
+
+    total_orders = Order.objects.all().count()
+    # https://stackoverflow.com/questions/687295/how-do-i-do-a-not-equal-in-django-queryset-filtering
+    active_shipments = Order.objects.filter(~Q(status='Delivered')).count()
+    low_inventories = Inventory.objects.filter(restock=True).count()
+    recent_orders = Order.objects.all().order_by('-date')[:10]
+    recent_shipping = OrderStatusHistory.objects.all().order_by('-last_updated')[:10]
+
+    context = {
+        'total_orders':total_orders,
+        'active_shipments':active_shipments,
+        'low_inventories':low_inventories,
+        'recent_orders': recent_orders,
+        'recent_shipping': recent_shipping
+    }
+
+    return render(request, gen_temp('home.html'), context)
 
 # Product & Inventory Management 
 # CRUD - Product

@@ -12,7 +12,14 @@ class LMSWorker(AbstractUser):
         ('ws', 'Warehouse Staff')
     ]
 
+    CARDS_CHOICES = [
+        ('visa', 'Visa'),
+        ('mc', 'Mastercard'),
+        ('ae', 'American Express')
+    ]
+
     email = models.EmailField(unique=True)
+    card = models.CharField(max_length=10, choices=CARDS_CHOICES, default='visa')
 
     # Leaving username necessary to sign in 
     USERNAME_FIELD = 'username'

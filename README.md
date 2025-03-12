@@ -20,6 +20,11 @@ Our [Flowchart](flowchart_&_usecase/TekBasic_-_Flowchart.jpg) and [User Story](f
 
 ## Update Logs 
 **03/11**
+- [x] Updated Home Page (Dashboard)
+- [x] Select Different Perferred Card?
+  - Visa | American Express | Mastercard
+
+**03/11**
 - [x] Multiple Order Items 
   -  List Group to display forms
   -  Sends get request for Product + Quantity (We make manually save the OrderItem)
