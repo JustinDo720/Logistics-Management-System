@@ -13,11 +13,16 @@ from django.db.models.functions import TruncMonth
 from django.db.models import Count, Sum
 import csv
 from django.http import HttpResponse
+<<<<<<< HEAD
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.conf import settings
 import stripe
 import json
+=======
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+>>>>>>> origin/master
 
 def gen_temp(temp_name):
     return f'logistics_app/{temp_name}' 
@@ -741,3 +746,63 @@ def handle_payment(request):
         # Building the payment form
         curr_oi = request.session.get('temp_order_items', None)   
         return render(request, gen_temp('stripe/checkout.html'), {'curr_oi':curr_oi, 'total_price':total_amount})
+
+
+def download_pdf_report_view(request):
+    # Get filter parameters from the GET request
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+
+    # Apply filtering based on user input
+    if start_date and end_date:
+        orders = Order.objects.filter(date__range=[start_date, end_date])
+    else:
+        orders = Order.objects.all()  # No filter, get all orders
+
+    # Create an HTTP response with PDF headers
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="orders_report.pdf"'
+
+    # Create a canvas for PDF generation
+    p = canvas.Canvas(response, pagesize=letter)
+    width, height = letter
+
+    # Add the title
+    p.setFont("Helvetica-Bold", 16)
+    p.drawString(100, height - 40, "Orders Report")
+
+    # Add table headers
+    p.setFont("Helvetica-Bold", 10)
+    p.drawString(50, height - 80, "Order ID")
+    p.drawString(120, height - 80, "Customer Name")
+    p.drawString(270, height - 80, "Date")
+    p.drawString(360, height - 80, "Status")
+    p.drawString(450, height - 80, "Total Price")
+
+    # Add the data
+    y_position = height - 100
+    p.setFont("Helvetica", 10)
+    for order in orders:
+        # Format the date to a shorter version (MM/DD/YYYY)
+        formatted_date = order.date.strftime("%m/%d/%Y") if order.date else ""
+
+        # Draw each field with better spacing
+        p.drawString(50, y_position, str(order.id))
+        p.drawString(120, y_position, order.customer_name[:20])  # Limit name length
+        p.drawString(270, y_position, formatted_date)
+        p.drawString(360, y_position, order.status[:10])  # Limit status length
+        p.drawString(450, y_position, str(order.total_price))
+
+        y_position -= 20
+
+        # Check if we are near the bottom of the page, create a new page if needed
+        if y_position < 50:
+            p.showPage()
+            p.setFont("Helvetica", 10)
+            y_position = height - 100  # Reset position for new page
+
+    # Finalize the PDF
+    p.showPage()
+    p.save()
+
+    return response

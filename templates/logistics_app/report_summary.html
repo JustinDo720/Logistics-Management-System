@@ -81,5 +81,7 @@
 </div>
 <!--passing filtering paramerter with the link-->
 <a href="{% url 'logistics_app:download_csv_report' %}?start_date={{ request.GET.start_date }}&end_date={{ request.GET.end_date }}" class="btn btn-primary">Download CSV</a>
+<a href="{% url 'logistics_app:download_pdf_report' %}?start_date={{ request.GET.start_date }}&end_date={{ request.GET.end_date }}" class="btn btn-primary">Download PDF</a>
+
 
 {% endblock %}

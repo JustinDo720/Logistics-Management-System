@@ -42,5 +42,6 @@ urlpatterns = [
     # Report Summary
     path('reports/', views.report_summary_view, name='report_summary'),
     path('download/csv', views.download_csv_report_view, name='download_csv_report'),
+    path('download/pdf/', views.download_pdf_report_view, name='download_pdf_report'),
 
 ]
