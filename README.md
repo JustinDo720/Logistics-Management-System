@@ -19,6 +19,15 @@ Our [UML](UML%20&%20Sketches/lms_uml.PNG) class diagrams will help us create our
 Our [Flowchart](flowchart_&_usecase/TekBasic_-_Flowchart.jpg) and [User Story](flowchart_&_usecase/tek_basic_LMS_spreadsheet.png) helps us map out the workflow of our logistic management system 
 
 ## Update Logs 
+**03/11**
+- [x] Multiple Order Items 
+  -  List Group to display forms
+  -  Sends get request for Product + Quantity (We make manually save the OrderItem)
+  -  (Commit is False)--> Django Sessions to store and talk between views 
+  -  Upon payment, we'll add to our DB 
+- [x] On Order creation successul send email 
+  - Order Must have an email field (we could assume its the user but since this is a management system, we might be making this order for someone) 
+- [ ] Integrate Stripe Payment 
 
 **03/10**
 - [x] View Tracking information (Specific Shipment) 

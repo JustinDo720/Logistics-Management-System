@@ -1,0 +1,92 @@
+{% extends 'base/order_create_temp.html' %}
+{% load crispy_forms_tags %}
+
+
+{# Order Item Form #}
+{% block form_content %}
+<div class="row mt-5">
+    {# Displaying the Product selection #}
+    <div class="col-12 col-md-4">
+      <div class="list-group" id="list-tab" role="tablist">
+        {% for prod in all_products %}
+            {# Using JS make sure the id ({{ prod.sku }}-list) be the same as our tab-pane aria-labelledby #}
+            <a class="list-group-item list-group-item-action {% if forloop.counter == 1 %}active{% endif %}" id="{{ prod.sku }}-list" data-bs-toggle="list" href="#{{ prod.sku }}" role="tab" aria-controls="{{ prod.sku }}">{{ prod.product_name }}</a> 
+        {% endfor %}
+      </div>
+    </div>
+    <div class="col-12 col-md-8">
+      <div class="tab-content" id="nav-tabContent">
+        {% for prod in all_products %}
+            {# Since our id is: {{ prod.sku }}-list we aria-labelledby must be: {{ prod.sku }}-list #}
+            <div class="tab-pane fade {% if forloop.counter == 1 %}show active{% endif %}" id="{{ prod.sku }}" role="tabpanel" aria-labelledby="{{ prod.sku }}-list">
+                {# Displaying our Form  based on read-only product #}
+                <div class="card">
+                    <div class="card-body">
+                      <h5 class="card-title fw-semibold fs-3">{{ prod.product_name }}</h5>
+                      <h6 class="card-subtitle mb-2 text-body-secondary">Add Item To Your Order</h6>
+                      {# We actually send a GET request to catch these fields in our url params #}
+                      <form method="GET">
+                        {# Read-Only Product Field #}
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="product" name="product" placeholder="{{ prod.product_name }}" value="{{ prod.sku }}" readonly>
+                            <label for="product">Product</label>                          
+                        </div>
+                        <div class="form-floating mb-3">
+                            {{ oi_form.quantity }}
+                            <label for="{{ oi_form.quantity.id }}">{{ oi_form.quantity.label }}</label>
+                        </div>
+                        <div class="d-grid">
+                            <button class="btn btn-success">
+                                Add to Order
+                            </button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                  <div class="row text-center mt-3">
+                    <div class="col-12 col-md-6"><a href="{% url 'logistics_app:order_list' %}" class="btn btn-sm btn-outline-secondary">Back to List</a></div>
+                    <div class="col-12 col-md-6"><a href="{% url 'logistics_app:clear_order_create_cont' %}" class="btn btn-sm btn-outline-danger">Clear Order</a></div>
+                </div>
+            </div>
+        {% endfor %}
+      </div>
+    </div>
+</div>
+{% endblock %}
+
+{# List of Current Order Items #}
+{% block extra_content %}
+<div class="row mt-5">
+    <div class="card" style="width: 18rem;">
+        {% load static %}
+        <img src="{% static 'Logistics_Management_System.png' %}" class="card-img-top" alt="...">
+        <div class="card-body">
+          <h5 class="card-title fw-bold">Order Summary</h5>
+        </div>
+        <ol class="list-group list-group-numbered list-group-flush">
+            {% if curr_oi %}
+                {% for oi in curr_oi %}
+                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                        <div class="ms-2 me-auto">
+                        <div class="fw-bold">{{ oi.product_name }}</div>
+                        Price: ${{ oi.price }}
+                        </div>
+                        <span class="badge text-light bg-secondary rounded-pill">{{ oi.quantity }}x</span>
+                    </li>
+                {% endfor %}
+            {% else %}
+            <li class="list-group-item d-flex justify-content-between align-items-start"> 
+                <div class="ms-2 me-auto">
+                <div class="fw-bold">No Items added...</div>
+            </li>
+            {% endif %}
+        </ol>
+        <div class="card-body">
+            <p class="card-text"><b>Total:</b> ${{ total_price }}</p>
+            <div class="d-grid">
+                <a href="{% url 'logistics_app:order_create_success' %}" class="btn btn-secondary">Pay Here</a>
+            </div>
+        </div>
+      </div>
+</div>
+{% endblock %}

@@ -1,42 +1,22 @@
+{% extends 'base/order_create_temp.html' %}
+{% load crispy_forms_tags %}
 
-{#  Make sure we extend from base/base.html everytime (templates/base/base.html) #}
-{% extends 'base/base.html' %}
+{% block form_content %}
+    <form method="post" action="{% url 'logistics_app:order_create' %}">
+        {% csrf_token %}
+        
+        <h3>Order Details</h3>
+        {{ order_form | crispy }}
 
-{# Block title  to Update our title #}
+        <!-- <h3>Order Items</h3>
+        {{ formset.management_form }}
+        {% for form in formset %}
+            <div class="order-item">
+                {{ form.as_p }}
 
-{% block title %}
-    Order Create 
-{% endblock %}
+            </div>
+        {% endfor %} -->
 
-{# Content is to modify everything that's within our Body #}
-{% block content %}
-
-<h1 class="text-center">Create an order</h1>
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <form method="post">
-                {% csrf_token %}
-                
-                <h3>Order Details</h3>
-                {{ order_form.as_p }}
-            
-                <h3>Order Items</h3>
-                {{ formset.management_form }}
-                {% for form in formset %}
-                    <div class="order-item">
-                        {{ form.as_p }}
-
-                    </div>
-                {% endfor %}
-            
-                <button class="btn btn-success form-control" type="submit">Submit Order</button>
-            </form>
-            
-            <br>
-            <a href="{% url 'logistics_app:order_list' %}" class="btn btn-secondary">Back to List</a>
-        </div>
-    </div>
-</div>
-
+        <button class="btn btn-success form-control" type="submit">Continue</button>
+    </form>
 {% endblock %}

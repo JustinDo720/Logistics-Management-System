@@ -31,6 +31,8 @@ class Order(models.Model):
     HEADQUARTERS_COORDS = [-74.52976762042528, 40.41706977125244]
 
     customer_name = models.CharField(max_length=150)
+    # Customer Email doesn't need to be unique because there could be multiple orders with the same email 
+    customer_email = models.EmailField(max_length=350)
     order_slug = models.SlugField(null=True, blank=True)
     date = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=50, choices=status_choices, default='Received')
