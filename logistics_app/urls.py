@@ -23,11 +23,15 @@ urlpatterns = [
     # Order Management
     path('orders/',views.order_list_view, name='order_list'),
     path('order/create', views.order_create_view, name='order_create'),
+    # Continue Order creation 
+    path('order/create/continue/', views.order_create_cont, name='order_create_cont'),
     path('orderdetail/<int:pk>/',views.order_detail_view, name='order_detail'),
     path('order/update/<int:pk>/',views.order_update_view, name='order_update'),
     path('order/delete/<int:pk>/', views.order_delete_view, name='order_delete'),
     # Order Item
-
+    path('orders/create/continue/clear/', views.clear_order_create, name='clear_order_create_cont'),
+    path('orders/create/payment/', views.handle_payment, name='handle_payment'),
+    path('orders/create/success/', views.order_payment_success, name='order_create_success'),
     # Drivers Management 
     path('order/route/list/', views.order_route_list, name='order_route_list'),
     path('order/route/<slug:order_slug>/', views.order_route, name='order_route'),

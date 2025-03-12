@@ -23,6 +23,7 @@ class LMSWorkerUpdate(forms.ModelForm):
         self.fields['new_password'].help_text = 'Update your password by creating a new one.'
         self.fields['username'].help_text = 'NOTE: Changing this field will change your login information.' 
         self.fields['role'].help_text = '"Worker" role is set by default.'
+        self.fields['card'].help_text = 'Preferred Card for checkout.'
 
         # Updating required fields 
         # https://stackoverflow.com/questions/16205908/django-modelform-not-required-field
@@ -34,6 +35,7 @@ class LMSWorkerUpdate(forms.ModelForm):
     # We're not displaying their hashed password but a fresh new password field
     new_password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}))
     role = forms.ChoiceField(choices=LMSWorker.ROLE_CHOICES, widget=forms.Select(attrs={'class': 'form-select'}))
+    card = forms.ChoiceField(choices=LMSWorker.CARDS_CHOICES, widget=forms.Select(attrs={'class': 'form-select'}))
 
     class Meta:
         model = LMSWorker
@@ -42,10 +44,11 @@ class LMSWorkerUpdate(forms.ModelForm):
             'email',
             'new_password',
             'profile_icon',
-            'role'
+            'role',
+            'card'
         ]
         widgets = {
             'username': forms.TextInput(attrs={'class': 'form-control'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
-            'profile_icon': forms.FileInput(attrs={'class': 'form-control'})
+            'profile_icon': forms.FileInput(attrs={'class': 'form-control'}),
         }

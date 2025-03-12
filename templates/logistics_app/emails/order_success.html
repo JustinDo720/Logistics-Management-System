@@ -1,0 +1,17 @@
+{% autoescape off %}
+  Thank you, {{ order_details.customer_email }}, for your purchase on {{ order_details.date }}!
+  
+  
+  Here is your order tracking information: #{{ order_details.order_slug }}
+
+  We will be delivering to your address: {{ order_details.destination_address}} in {{ order_details.route.get_eta }} (HH:MM:SS)
+
+
+  You may find addition details here: http://localhost:8000{% url 'logistics_app:order_detail' pk=order_details.id %}
+
+  If clicking the link above doesn't work, please copy and paste the URL in a new browser
+  window instead.
+
+  Sincerely,
+  Logistics Management System
+{% endautoescape %}

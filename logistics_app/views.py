@@ -13,6 +13,11 @@ from django.db.models.functions import TruncMonth
 from django.db.models import Count, Sum
 import csv
 from django.http import HttpResponse
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.conf import settings
+import stripe
+import json
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 
@@ -20,8 +25,33 @@ def gen_temp(temp_name):
     return f'logistics_app/{temp_name}' 
 
 # Create your views here.
+@login_required
 def home_page(request):
-    return render(request, gen_temp('home.html'))
+    """
+        Here's what we need to display on the main dashboard:
+            - Total # of Orders
+            - ACTIVE shipments (not delivered)
+            - # Inventories that need to be restock
+            - 10 Recent Orders (ordered by date)
+            - 10 recent Route History 
+    """
+
+    total_orders = Order.objects.all().count()
+    # https://stackoverflow.com/questions/687295/how-do-i-do-a-not-equal-in-django-queryset-filtering
+    active_shipments = Order.objects.filter(~Q(status='Delivered')).count()
+    low_inventories = Inventory.objects.filter(restock=True).count()
+    recent_orders = Order.objects.all().order_by('-date')[:10]
+    recent_shipping = OrderStatusHistory.objects.all().order_by('-last_updated')[:10]
+
+    context = {
+        'total_orders':total_orders,
+        'active_shipments':active_shipments,
+        'low_inventories':low_inventories,
+        'recent_orders': recent_orders,
+        'recent_shipping': recent_shipping
+    }
+
+    return render(request, gen_temp('home.html'), context)
 
 # Product & Inventory Management 
 # CRUD - Product
@@ -301,55 +331,170 @@ def order_detail_view(request, pk):
     order_items = OrderItem.objects.filter(order=order)
     return render(request, 'logistics_app/order_detail.html', {'order': order, 'order_items': order_items})
 
+# CRUD - Order Items | Creating an Order With multiple Order Items 
+# Helper Function
+def clear_session(request):
+    if 'temp_total_price' in request.session:
+        del request.session['temp_total_price']
+
+    if 'temp_order_items' in request.session:
+        del request.session['temp_order_items']
+
+    if 'user_temp_order' in request.session:
+        del request.session['user_temp_order']
+
+    return True 
+
 @login_required
 def order_create_view(request):
+    """
+        The idea is that we CONTINUE our form to select multiple Products 
+
+        For each product we create an Order Item Object 
+
+        Finally we tie all order itms into that one order 
+
+    """
     if request.method == "POST":
+
         order_form = OrderCreateForm(request.POST)
-        formset = OrderItemFormSet(request.POST)
+        # formset = OrderItemFormSet(request.POST)
 
-        if order_form.is_valid() and formset.is_valid():
-            order = order_form.save()
+        if order_form.is_valid():
+            order_form.save(commit=False)
+            # This is where we use DJango Sessions to access accross views
+            # The idea is that we don't save UNTIL the user pays 
+            # Make sure to pass in the form NOT the order itself
+            request.session['user_temp_order'] = order_form.cleaned_data    # Because the order instance is not a serializable item to pass in sessions  
 
-            for form in formset:
-                order_item = form.save(commit=False)
-                product = order_item.product
-
-                # Find an inventory location with stock above the threshold, sorted by highest stock
-                available_inventory = Inventory.objects.filter(
-                    product=product, stock__gt=F('stock_threshold')  # Stock should be greater than threshold
-                ).order_by('-stock').first()  # Select the inventory with the highest stock
-
-                if available_inventory:
-                    available_inventory.stock -= order_item.quantity  # Deduct stock
-                    available_inventory.save()
-
-                    order_item.order = order
-                    order_item.inventory = available_inventory  # Store the inventory location
-                    order_item.save()
-                else:
-                    # Handle out-of-stock scenario (optional)
-                    messages.warning(request, f"Low stock for {product.product_name} at any location.")
-                    order.delete()  # Rollback order if needed
-                    return redirect('logistics_app:order_create')
-
-            return redirect('/orders/')
+            # We'll save the order first and then redirect to another view to continue our order creation 
+            # Since we're using sesions, we don't need a pk
+            return redirect('logistics_app:order_create_cont')
 
     else:
         order_form = OrderCreateForm()
-        formset = OrderItemFormSet()
+        # Before we create, we should ALWAYS get rid of our django sessions
+        clear_session(request)
 
     return render(request, 'logistics_app/order_create.html', {
-        'order_form': order_form,
-        'formset': formset,
+        'order_form': order_form
     })
 
+@login_required
+def order_create_cont(request):
+    # We'll use django sessions to retrieve our temp order 
+    # Remember our Django Session holds form data so we could reconstruct our order object
+    order_data = request.session.get('user_temp_order', None)
+    # https://stackoverflow.com/questions/1571570/can-a-dictionary-be-passed-to-django-models-on-create
+    # order = Order.objects.create(id=order_data.id, customer_name=order_data.customer_name, 
+    #                              order_slug=order_data.customer_name, date=order_data.date, status=order_data.status,
+    #                              priority_level=order_data.priority_level, destination_address=order_data.destination_address)
+    order = Order(**order_data)  # Passes in key,value similar to what we commented out above (But this doesnt CREATE our order object just fills in the data)
+    # Catching our Order Items Params
+    oi_sku = request.GET.get('product')
+    oi_quantity = request.GET.get('quantity')
 
- 
-    # order_form = OrderItemFormSetUpdate(instance=order)
-    # formset = OrderItemFormSetUpdate(queryset=OrderItem.objects.filter(order=order))  # Load existing order items
+    # Display a form to choose a bunch of products first 
+    if request.method == 'GET' and order:
+        all_products = Product.objects.all()
+        formset = OrderItemCreateForm()
+        # Displaying a list of Order Items for this Order 
+        # Django Session Temp Order Item
+        temp_oi_list = request.session.get('temp_order_items', [])
+        temp_total_price = request.session.get('temp_total_price',0)
+        # We'll save our items if the user submitted a product + quantity 
+        if oi_sku and oi_quantity:
+            product = get_object_or_404(Product, sku=oi_sku)
+            # Since we're working with temp data, we don't need to create an OrderItem object
+            # We just need to pass the chosen product along with the quantity 
+            # After payment we'll take care of saving the order, then create the orderitem 
+            temp_oi = {
+                'product_sku': product.sku,
+                'quantity': oi_quantity,
+                'product_name': product.product_name,
+                'price': float(product.price)
+            }
+            
+            # Adding this to our list of order item
+            temp_oi_list = request.session.get('temp_order_items', [])
+            temp_oi_list.append(temp_oi)
+
+            # Saving to our session 
+            request.session['temp_order_items'] = temp_oi_list
+            print('New: ', request.session.get('temp_order_items', []))
+
+            # Manually Calculating the total price for this temp order item list 
+            temp_total_price += int(oi_quantity) * float(product.price)
+            request.session['temp_total_price'] = float(temp_total_price)   # Sooo weird, Decimal isnt JSON Serializable, but they accept float 
+
+            print(request.session['temp_total_price'])
+
+        return render(request, gen_temp('order_create_confirm.html'), {'all_products':all_products, 'oi_form': formset, 'curr_oi': temp_oi_list, 'total_price':temp_total_price})
+
+def clear_order_create(request):
+    # Since the data is temp, we just need to clear our Django Session
+    finished_clear = clear_session(request)
+    if finished_clear:
+        messages.warning(request, 'Cleared Previous Order Data')
+    return redirect('logistics_app:order_list')
 
 @login_required
+def order_payment_success(request):
+    # Handling success (This is where we build our order object)
+    order_fd = request.session.get('user_temp_order', None)
+    order_oi_fd = request.session.get('temp_order_items', None)
+    
+    if order_fd and order_oi_fd:
+        # Build our actual order 
+        order = Order.objects.create(**order_fd)
+        order.save() 
 
+        # All the order items:
+        for o_item in order_oi_fd:
+            print(o_item)
+            # o_item has: product_sku & quantity which are fields we need to build order_item 
+            product = get_object_or_404(Product, sku=o_item['product_sku'])
+            order_item = OrderItem.objects.create(order=order, product=product, quantity=o_item['quantity'])
+            order_item.save()
+
+            # Handling Inventory deducation
+            # Find an inventory location with stock above the threshold, sorted by highest stock
+            available_inventory = Inventory.objects.filter(
+                product=product, stock__gt=F('stock_threshold')  # Stock should be greater than threshold
+            ).order_by('-stock').first()  # Select the inventory with the highest stock
+         
+            if available_inventory:
+                available_inventory.stock -= int(order_item.quantity)  # Deduct stock
+                available_inventory.save()
+
+                order_item.order = order
+                order_item.inventory = available_inventory  # Store the inventory location
+                order_item.save()
+            else:
+                # Handle out-of-stock scenario (optional)
+                messages.warning(request, f"Low stock for {product.product_name} at any location.")
+                # order.delete()  # Rollback order if needed
+                # return redirect('logistics_app:order_create_cont', pk=order.id)
+        
+        # Finished Building Order with associated Order Item + Deducting from highest Inventory
+        messages.success(request, 'Successfully Created Order. An email has been sent for confirmation!')
+
+        # Sending Confirmation Email:
+        success_html_msg = render_to_string(gen_temp('emails/order_success.html'), {'order_details': order})
+        send_mail(
+            'Thank you for your purchase with LMS!',
+            success_html_msg,
+            settings.EMAIL_HOST_USER,
+            [order.customer_email],
+            fail_silently=False,
+        )
+
+        # Clean Django Session (Temp Keys)
+        clear_session(request)
+        return redirect('logistics_app:order_list')
+        
+
+@login_required
 def order_update_view(request, pk):
     order = get_object_or_404(Order, pk=pk)
 
@@ -572,7 +717,32 @@ def download_csv_report_view(request):
 
     return response
 
+# Stripe Payment Gateway 
+stripe.api_key = settings.STRIPE_SECRET_KEY
 
+def handle_payment(request):
+    # Remember we're using Django Sessions which hasn't been cleared yet
+    # https://stackoverflow.com/questions/74100476/integrate-stripe-payment-flow-into-django
+    # PaymentIntent
+    total_amount = request.session.get('temp_total_price', 0)   
+    stripe_amt = int(total_amount * 100)    # This must be in cents for stripe 
+    if request.method == "POST":
+        intent = stripe.PaymentIntent.create(
+            amount=stripe_amt,
+            currency='usd',
+            automatic_payment_methods={
+                'enabled': True,
+            },
+        )
+        # return HttpResponse(
+        #     json.dumps({'clientSecret': intent['client_secret']}),
+        #     content_type='application/json'
+        # )
+        return JsonResponse({'clientSecret': intent['client_secret']})
+    else:
+        # Building the payment form
+        curr_oi = request.session.get('temp_order_items', None)   
+        return render(request, gen_temp('stripe/checkout.html'), {'curr_oi':curr_oi, 'total_price':total_amount})
 
 
 def download_pdf_report_view(request):

@@ -19,6 +19,30 @@ Our [UML](UML%20&%20Sketches/lms_uml.PNG) class diagrams will help us create our
 Our [Flowchart](flowchart_&_usecase/TekBasic_-_Flowchart.jpg) and [User Story](flowchart_&_usecase/tek_basic_LMS_spreadsheet.png) helps us map out the workflow of our logistic management system 
 
 ## Update Logs 
+**03/11**
+- [x] Updated Home Page (Dashboard)
+- [x] Select Different Perferred Card?
+  - Visa | American Express | Mastercard
+
+**03/11**
+- [x] Multiple Order Items 
+  -  List Group to display forms
+  -  Sends get request for Product + Quantity (We make manually save the OrderItem)
+  -  (Commit is False)--> Django Sessions to store and talk between views 
+  -  Upon payment, we'll add to our DB 
+- [x] On Order creation successul send email 
+  - Order Must have an email field (we could assume its the user but since this is a management system, we might be making this order for someone) 
+- [x] Integrate Stripe Payment 
+  - We only wan to do **Charge** which uses their server-side instead of a client-based (making product on their page and redirecting our users to it)
+    - Stripe Charge API [Reference](https://stackoverflow.com/questions/55092240/how-to-integrate-stripe-payment-with-existing-django-form-and-only-save-form-on)
+    - We're looking at [PaymentIntent](https://docs.stripe.com/payments/quickstart?lang=python) + Stackoverflow [response](https://stackoverflow.com/questions/74100476/integrate-stripe-payment-flow-into-django)
+    - Copied over the views + checkout.html BUT checkout.js 
+      - Change the fetch() url to use our views, success url to our views + Remove **hard coded items**
+  - Testing [cards](https://docs.stripe.com/testing)
+  - In summary, we pulled changed checkout.html + checkout.js to fit our script. Created a path to handle payment (generate token for PayementIntent)
+    - We're using **server-side** instead of client
+- [x] Order Summary
+  - Include what they're buying + Testing Cards
 
 **03/10**
 - [x] View Tracking information (Specific Shipment) 

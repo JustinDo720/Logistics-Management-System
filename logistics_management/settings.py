@@ -51,7 +51,6 @@ INSTALLED_APPS = [
     'crispy_forms',
     'crispy_bootstrap5',
     'django_extensions',
-    
 ]
 
 MIDDLEWARE = [
@@ -188,3 +187,7 @@ EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_HOST_USER = os.getenv('EMAIL_APP_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_APP_PASSWORD')
+
+# Stripe Payment 
+STRIPE_SECRET_KEY = os.getenv('STRIPE_SK')
+STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PK')

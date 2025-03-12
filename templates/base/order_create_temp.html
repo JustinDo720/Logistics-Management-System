@@ -1,0 +1,26 @@
+
+{#  Make sure we extend from base/base.html everytime (templates/base/base.html) #}
+{% extends 'base/base.html' %}
+
+{# Block title  to Update our title #}
+
+{% block title %}
+    Order Create 
+{% endblock %}
+
+{# Content is to modify everything that's within our Body #}
+{% block content %}
+
+<h1 class="text-center">Create an order</h1>
+    <div class="row">
+        <div class="col-md-8">
+            {% block form_content %} {% endblock %}
+        </div>
+        <div class="col-md-4">
+            {% block extra_content %} {% endblock %}
+            <br>
+            
+        </div>
+    </div>
+
+{% endblock %}

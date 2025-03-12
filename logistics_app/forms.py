@@ -13,9 +13,7 @@ class OrderCreateForm(forms.ModelForm):
 
     class Meta:
         model = Order
-        fields = ['customer_name', 'destination_address', 'priority_level']
-
-
+        fields = ['customer_name', 'customer_email', 'destination_address', 'priority_level']
 
 class OrderUpdateForm(forms.ModelForm):
     customer_name = forms.CharField(widget=forms.TimeInput(attrs={'class': 'form-control'}))
@@ -29,9 +27,11 @@ class OrderUpdateForm(forms.ModelForm):
     )
     destination_address = forms.CharField(widget=forms.TimeInput(attrs={'class': 'form-control'}))
 
+    customer_email = forms.CharField(widget=forms.EmailInput(attrs={'class': 'form-control'}))
+
     class Meta:
         model = Order
-        fields = ['customer_name', 'status', 'priority_level', 'destination_address']
+        fields = ['customer_name', 'customer_email', 'status', 'priority_level', 'destination_address']
 
 
 class OrderItemCreateForm(forms.ModelForm):
@@ -40,11 +40,14 @@ class OrderItemCreateForm(forms.ModelForm):
         queryset=Product.objects.all(),  # Fetch all products
         widget=forms.Select(attrs={'class': 'form-control'})
     )
-    quantity = forms.IntegerField(widget=forms.TimeInput(attrs={'class': 'form-control'}))
+    quantity = forms.IntegerField(widget=forms.NumberInput(attrs={'class': 'form-control', 'id': 'quantityAmount', 'aria-label': 'Floating Label quantity amount'}))
 
     class Meta:
         model = OrderItem
         fields = ['product', 'quantity']
+        widget = {
+            'product': forms.Select(attrs={'class': 'form-select', 'id': 'productSelect', 'aria-label': 'Floating Label product select'})
+        }
 
         # ensures the order quantity does not exceed available stock. 
         def clean_quantity(self):
