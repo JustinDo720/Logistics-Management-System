@@ -17,6 +17,7 @@ Our [UML](UML%20&%20Sketches/lms_uml.PNG) class diagrams will help us create our
 ## LMS Flowchart & User Story 
 
 Our [Flowchart](flowchart_&_usecase/TekBasic_-_Flowchart.jpg) and [User Story](flowchart_&_usecase/tek_basic_LMS_spreadsheet.png) helps us map out the workflow of our logistic management system 
+[User story](https://docs.google.com/spreadsheets/d/1TRWM4X3m8ce1DH5L9vNB4vYQrEc0RXMGlLlSn-PWqgg/edit?usp=sharing)
 
 ## Update Logs 
 **03/11**
