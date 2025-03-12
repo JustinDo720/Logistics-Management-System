@@ -30,6 +30,7 @@ urlpatterns = [
     path('order/delete/<int:pk>/', views.order_delete_view, name='order_delete'),
     # Order Item
     path('orders/create/continue/clear/', views.clear_order_create, name='clear_order_create_cont'),
+    path('orders/create/payment/', views.handle_payment, name='handle_payment'),
     path('orders/create/success/', views.order_payment_success, name='order_create_success'),
     # Drivers Management 
     path('order/route/list/', views.order_route_list, name='order_route_list'),

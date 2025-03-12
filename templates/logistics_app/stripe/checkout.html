@@ -1,0 +1,96 @@
+{% extends 'base/base.html' %}
+{% block title %}LMS | Payment System{% endblock %}
+
+{% block extra_meta_tags %}
+{# Must use static here. These files have to be in our static files #}
+{% load static %}
+<!-- <link rel="stylesheet" href="{% static 'stripe/checkout.css' %}" /> -->
+<script>
+    // Using this is checkout.js with our fetch()
+    const csrfToken = "{{ csrf_token }}";
+</script>
+<script src="https://js.stripe.com/v3/"></script>
+<script src="{% static 'stripe/checkout.js' %}"  defer></script>
+{% endblock %}
+
+{% block content %}
+<div class="row mt-3 mb-4">
+    <div class="col-12 text-center">
+        <h1 class="fw-bold fs-3">
+            Payment Gateway
+        </h1>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12 col-md-6">
+        <div class="row">
+            {# Card Information #}
+            <div class="card border-light bg-primary text-light shadow-sm">
+                <div class="card-body">
+                <h5 class="card-title fw-bolder fs-3">Visa</h5>
+                <p class="text-center fw-semibold fs-4 p-3">
+                    4242 4242 4242 4242
+                </p>
+                <div class="row text-center">
+                    <div class="col-12 col-md-6">
+                        Good Thru: 05/27
+                    </div>
+                    <div class="col-12 col-md-6">
+                        CVC: 598
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12 col-md-6">
+                        <span class="fw-bold fs-3">{{ user.username }}</span>
+                    </div>
+                    <div class="col-12 col-md-6 text-end">
+                        <span >Zipcode: 12345</span>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-5">
+            {# Order Summary #}
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold">Order Summary</h5>
+                </div>
+                <ol class="list-group list-group-numbered list-group-flush">
+                    {% for oi in curr_oi %}
+                        <li class="list-group-item d-flex justify-content-between align-items-start">
+                            <div class="ms-2 me-auto">
+                            <div class="fw-bold">{{ oi.product_name }}</div>
+                            Price: ${{ oi.price }}
+                            </div>
+                            <span class="badge text-light bg-secondary rounded-pill">{{ oi.quantity }}x</span>
+                        </li>
+                    {% endfor %}
+                </ol>
+                <div class="card-body">
+                    <p class="card-text"><b>Total:</b> ${{ total_price }}</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="col-12 col-md-6">
+        <!-- Display a payment form -->
+        <form id="payment-form" class="m-auto shadow-lg p-1 rounded">
+            {% csrf_token %}
+            <div id="payment-element">
+            <!--Stripe.js injects the Payment Element-->
+            </div>
+            <div class="text-center mt-3 d-grid">
+                <button id="submit" class="btn btn-sm btn-success">
+                    <div class="spinner hidden" id="spinner"></div>
+                    <div class="text-center"></div>
+                    <span id="button-text" class="btn btn-success ">Pay now</span>
+                </button>
+            </div>
+            <div id="payment-message" class="hidden"></div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

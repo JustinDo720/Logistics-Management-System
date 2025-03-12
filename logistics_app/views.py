@@ -16,6 +16,8 @@ from django.http import HttpResponse
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.conf import settings
+import stripe
+import json
 
 def gen_temp(temp_name):
     return f'logistics_app/{temp_name}' 
@@ -448,7 +450,7 @@ def order_payment_success(request):
                 # return redirect('logistics_app:order_create_cont', pk=order.id)
         
         # Finished Building Order with associated Order Item + Deducting from highest Inventory
-        messages.success(request, 'Successfully Created Order!')
+        messages.success(request, 'Successfully Created Order. An email has been sent for confirmation!')
 
         # Sending Confirmation Email:
         success_html_msg = render_to_string(gen_temp('emails/order_success.html'), {'order_details': order})
@@ -687,3 +689,30 @@ def download_csv_report_view(request):
         writer.writerow([order.id, order.customer_name, order.date, order.status, order.total_price])
 
     return response
+
+# Stripe Payment Gateway 
+stripe.api_key = settings.STRIPE_SECRET_KEY
+
+def handle_payment(request):
+    # Remember we're using Django Sessions which hasn't been cleared yet
+    # https://stackoverflow.com/questions/74100476/integrate-stripe-payment-flow-into-django
+    # PaymentIntent
+    total_amount = request.session.get('temp_total_price', 0)   
+    stripe_amt = int(total_amount * 100)    # This must be in cents for stripe 
+    if request.method == "POST":
+        intent = stripe.PaymentIntent.create(
+            amount=stripe_amt,
+            currency='usd',
+            automatic_payment_methods={
+                'enabled': True,
+            },
+        )
+        # return HttpResponse(
+        #     json.dumps({'clientSecret': intent['client_secret']}),
+        #     content_type='application/json'
+        # )
+        return JsonResponse({'clientSecret': intent['client_secret']})
+    else:
+        # Building the payment form
+        curr_oi = request.session.get('temp_order_items', None)   
+        return render(request, gen_temp('stripe/checkout.html'), {'curr_oi':curr_oi, 'total_price':total_amount})
